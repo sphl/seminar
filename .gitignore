@@ -23,6 +23,7 @@
 *-blx.bib
 *.run.xml
 *.bcf
+*.bak
 *.pdf
 *.synctex.gz
 *.txss

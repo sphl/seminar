@@ -1,1 +1,13 @@
 \section{Motivation}
+
+% Software wird nahezu überall eingesetzt und C wird in sicherheitskritischen System verwendet
+
+Software ist in der heutigen Zeit nahezu in allen Lebensbereichen vorzufinden, häufig in Form von eingebetteten Systemen in sicherheits- und missionskritischen Fahrzeugen, Anlagen und Geräten. Ein Großteil der eingesetzten Software ist dabei in C geschrieben, dass sich mitunter durch die Nähe zur Hardware, der hohen Performance und der großen Anzahl an \emph{Legacy}-Systemen erklären lässt. Dementsprechend liegen die Qualitätsanforderungen für solche Softwaresysteme weit über denen der weniger kritischen Anwendungen, da ein Ausfall bzw. eine fehlerhafte Ausführung katastrophale Folgen haben kann.
+
+% Negativbeispiel:  Therac-25
+
+Ein Fallbeispiel aus der Medizin, dass die folgenschweren Auswirkungen aufgrund eines Softwarefehlers verdeutlicht, ist der Linearbeschleuniger \emph{Therac-25}\footnote{Teilchenbeschleuniger, der von 1985 bis 1987 zur Strahlentherapie in Kanada und den USA eingesetzt wurde.} \cite{Pfeifer2003}. Der Beschleuniger bestrahlte das Gewebe von Patienten entweder 1.) mit schwacher Elektronenstrahlung oder 2.) mit starker Röntgenstrahlung in Kombination mit einer filternden bzw. abschwächenden Bleiplatte. Die Fehlfunktion bestand darin, dass es neben den beiden genannten Zuständen noch einen weiteren (unbekannten) Zustand gab, bei dem Patienten der starken Strahlung ohne Platte ausgesetzt waren. Dies hatte zur Folge, dass mehrere Patienten einer 100-fach höheren Strahlenbelastung ausgesetzt waren und es dadurch zu sechs Todesfällen aufgrund eines Softwaredefekts kam.
+
+% Dynamisches Testen vergisst Zustände
+
+Die Funktionalität von Softwaresysteme ist bereits heute so komplex und weitreichend, dass deren vollständige Korrektheit mit Hilfe dynamischer Tests nicht mehr nachgewiesen werden kann. Dies bedeutet im Umkehrschluss, dass Testfälle nur für eine Untermenge der möglichen Systemzustände generiert und ausgeführt werden können. Dadurch steigt die Wahrscheinlichkeit das wichtige Testfälle ausgelassen bzw. übersehen werden (siehe Therac-25) und sicherheitskritische Anwendungen unzureichend verifiziert sind. Formale Methoden zeigen hier eine Lösung auf, indem das Programm auf einer höheren Abstraktionsstufe spezifiziert wird und somit sicherheitskritische Eigenschaften bzw. Anforderungen für beliebige Systemzustände mathematisch bewiesen werden können \cite{Crocker2007}.
