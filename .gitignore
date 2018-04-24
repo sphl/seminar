@@ -29,3 +29,4 @@
 *.txss
 .packages
 thesis.pdf
+.DS_Store
