@@ -37,7 +37,16 @@
 \usepackage[utf8]{inputenc} % Required for inputting international characters
 \usepackage[T1]{fontenc} % Output font encoding for international characters
 
-\usepackage{mathpazo} % Palatino font
+\usepackage[ngerman]{babel}
+
+\usepackage{graphicx}
+\graphicspath{{Images/}}
+
+\usepackage[ngerman]{varioref}
+\usepackage{hyperref}
+\usepackage[ngerman]{cleveref}
+
+%\usepackage{mathpazo} % Palatino font
 
 \begin{document}
 
@@ -120,5 +129,19 @@
 \end{titlepage}
 
 %----------------------------------------------------------------------------------------
+
+\section{VeriFast}
+
+Im Rahmen dieser Seminararbeit werden wir uns hauptsächlich mit Verifikationswerkzeug \emph{VeriFast} auseinandersetzen, dass in Form eines Prototypen an der KU Leuven ins Leben gerufen wurde und bis heute, Stand 2018, aktiv weiterentwickelt wird. VeriFast erlaubt die Verifikation von \emph{single-} und \emph{multithreaded} C und Java Programmen, welche mit zusätzlichen Annotationen, für die Verifikation bestimmter Korrektheitseigenschaften, ausgestattet sind. Die Annotationen stehen dabei innerhalb von Kommentaren, wodurch der verifizierte C Code ohne zusätzliche Änderungen kompiliert werden kann. Während der Ausführung von VeriFast wird das Programm auf illegale Speicherzugriffe, beispielsweise durch Dereferenzierung von Null-Pointern oder durch Zugriff auf Speicherzellen außer der Grenzen eines Arrays, sowie Fehler aufgrund nebenläufiger Ausführung geprüft. Darüber hinaus untersucht VeriFast die annotierten Methoden-Kontrakte - d.h. es wird versucht zu zeigen, dass sich die spezifizierte Nachbedingung aus der Vorbedingung und der symbolischen Ausführung des Methodenrumpfs ableiten lässt.
+
+\begin{figure}[!hbt]
+	\centering
+	\includegraphics[width=0.8\linewidth]{verifast}
+	\caption{VeriFast IDE}
+	\label{fig:vfide}
+\end{figure}
+
+\noindent
+Über die VeriFast IDE (siehe \vref{fig:vfide}) können Quellcodedateien modifiziert und Programmpfade einzelner Funktionen schrittweise ausgeführt werden. Im Falle eines Fehlers werden diese innerhalb des Editors lokalisiert und dem Benutzer über ein Statusfeld mitgeteilt.
 
 \end{document}
