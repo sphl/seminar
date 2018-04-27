@@ -1,14 +1,14 @@
 #include "stdlib.h"
 
-/*@
-predicate account_pred(struct account *myAccount, int theLimit, int theBalance) =
-  myAccount->limit |-> theLimit &*& myAccount->balance |-> theBalance &*& malloc_block_account(myAccount);
-@*/
-
 struct account {
   int limit;
   int balance;
 };
+
+/*@
+predicate account_pred(struct account *myAccount, int theLimit, int theBalance) =
+  myAccount->limit |-> theLimit &*& myAccount->balance |-> theBalance &*& malloc_block_account(myAccount);
+@*/
 
 struct account *create_account(int limit)
   //@ requires limit <= 0;
