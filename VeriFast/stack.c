@@ -11,77 +11,124 @@ struct stack {
 
 /*@
 
-predicate nodes(struct node *node, int count) =
-  node == 0 ?
-    count == 0
-  :
-    0 < count
-    &*& node->next |-> ?next &*& node->value |-> ?value
-    &*& malloc_block_node(node) &*& nodes(next, count - 1);
+inductive ints = ints_nil | ints_cons(int, ints);
 
-predicate stack(struct stack *stack, int count) =
-  stack->head |-> ?head &*& malloc_block_stack(stack) &*& 0 <= count &*& nodes(head, count);
+fixpoint int ints_head(ints values) {
+  switch (values) {
+    case ints_nil: return 0;
+    case ints_cons(value, values0): return value;
+  }
+}
+
+fixpoint ints ints_tail(ints values) {
+  switch (values) {
+    case ints_nil: return ints_nil;
+    case ints_cons(value, values0): return values0;
+  }
+}
+
+fixpoint int ints_sum(ints values) {
+  switch (values) {
+    case ints_nil: return 0;
+    case ints_cons(value, values0): return value + ints_sum(values0);
+  }
+}
+
+predicate nodes(struct node *node, ints values) =
+  node == 0 ?
+    values == ints_nil
+  :
+    node->next |-> ?next &*& node->value |-> ?value
+    &*& malloc_block_node(node) &*& nodes(next, ?values0)
+    &*& values == ints_cons(value, values0);
+
+predicate stack(struct stack *stack, ints values) =
+  stack->head |-> ?head &*& malloc_block_stack(stack) &*& nodes(head, values);
 
 @*/
 
 struct stack *create_stack()
   //@ requires true;
-  //@ ensures stack(result, 0);
+  //@ ensures stack(result, ints_nil);
 {
   struct stack *stack = malloc(sizeof(struct stack));
   if (stack == 0) { abort(); }
   stack->head = 0;
-  //@ close nodes(0, 0);
-  //@ close stack(stack, 0);
+  //@ close nodes(0, ints_nil);
+  //@ close stack(stack, ints_nil);
   return stack;
 }
 
 bool stack_is_empty(struct stack *stack)
-  //@ requires stack(stack, ?count);
-  //@ ensures stack(stack, count) &*& result == (count == 0);
+  //@ requires stack(stack, ?values);
+  //@ ensures stack(stack, values) &*& result == (values == ints_nil);
 {
-  //@ open stack(stack, count);
+  //@ open stack(stack, values);
   struct node *head = stack->head;
-  //@ open nodes(head, count);
+  //@ open nodes(head, values);
   bool result = head == 0;
-  //@ close nodes(head, count);
-  //@ close stack(stack, count);
+  //@ close nodes(head, values);
+  //@ close stack(stack, values);
   return result;
 }
 
 void stack_push(struct stack *stack, int value)
-  //@ requires stack(stack, ?count);
-  //@ ensures stack(stack, count + 1);
+  //@ requires stack(stack, ?values);
+  //@ ensures stack(stack, ints_cons(value, values));
 {
-  //@ open stack(stack, count);
+  //@ open stack(stack, values);
   struct node *n = malloc(sizeof(struct node));
   if (n == 0) { abort(); }
   n->next = stack->head;
   n->value = value;
   stack->head = n;
-  //@ close nodes(n, count + 1);
-  //@ close stack(stack, count + 1);
+  //@ close nodes(n, ints_cons(value, values));
+  //@ close stack(stack, ints_cons(value, values));
 }
 
 int stack_pop(struct stack *stack)
-  //@ requires stack(stack, ?count) &*& 0 < count;
-  //@ ensures stack(stack, count - 1);
+  //@ requires stack(stack, ?values) &*& values == ints_cons(?value0, ?values0);
+  //@ ensures stack(stack, ints_tail(values)) &*& result == ints_head(values);
 {
-  //@ open stack(stack, count);
+  //@ open stack(stack, values);
   struct node *head = stack->head;
-  //@ open nodes(head, count);
+  //@ open nodes(head, values);
   int result = head->value;
   stack->head = head->next;
   free(head);
-  //@ close stack(stack, count - 1);
+  //@ close stack(stack, values0);
+  return result;
+}
+
+int nodes_get_sum(struct node *node)
+  //@ requires nodes(node, ?values);
+  //@ ensures nodes(node, values) &*& result == ints_sum(values);
+{
+  //@ open nodes(node, values);
+  int result = 0;
+  if (node != 0) {
+    int tailSum = nodes_get_sum(node->next);
+    result = node->value + tailSum;
+  }
+  //@ close nodes(node, values);
+  return result;
+}
+
+int stack_get_sum(struct stack *stack)
+  //@ requires stack(stack, ?values);
+  //@ ensures stack(stack, values) &*& result == ints_sum(values);
+{
+  //@ open stack(stack, values);
+  int result = nodes_get_sum(stack->head);
+  //@ close stack(stack, values);
   return result;
 }
 
 void stack_dispose1(struct stack *stack)
-  //@ requires stack(stack, 0);
+  //@ requires stack(stack, ints_nil);
   //@ ensures true;
 {
-  //@ open stack(stack, 0);
+  //@ open stack(stack, ints_nil);
   //@ open nodes(_, _);
   free(stack);
 }
@@ -132,8 +179,10 @@ int main()
   struct stack *s = create_stack();
   stack_push(s, 10);
   stack_push(s, 20);
-  stack_pop(s);
-  stack_pop(s);
-  stack_dispose2(s);
+  int result1 = stack_pop(s);
+  assert(result1 == 20);
+  int result2 = stack_pop(s);
+  assert(result2 == 10);
+  stack_dispose3(s);
   return 0;
 }
