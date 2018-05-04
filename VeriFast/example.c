@@ -21,7 +21,9 @@ struct cblock *create_cblock(int len)
   //@ ensures cblock(result, len, _);
 {
   struct cblock *cblock = malloc(sizeof(struct cblock));
-  if (cblock == 0) { abort(); }
+  if (cblock == 0) {
+    abort();
+  }
   char *arr = malloc(len);
   if (arr == 0) {
     free(cblock);
@@ -36,32 +38,22 @@ struct cblock *create_cblock(int len)
 
 bool array_contains(char *arr, int len, char c)
   //@ requires chars(arr, len, ?list);
-  /*@ ensures chars(arr, len, list) &*&
-        (len == 0) ?
-          result == false
-        :
-          result == (c == head(list) || result);
-  @*/
+  //@ ensures chars(arr, len, list) &*& result == mem<char>(c, list);
 {
+  //@ open chars(arr, len, list);
   bool res = false;
   if (len > 0) {
-    //@ open chars(arr, len, list);
     bool cmp = (*arr == c);
     bool tmp = array_contains(arr + 1, len - 1, c);
     res = (cmp || tmp);
-    //@ close chars(arr, len, list);
   }
+  //@ close chars(arr, len, list);
   return res;
 }
 
 bool cblock_contains(struct cblock *cblock, char c)
   //@ requires cblock(cblock, ?len, ?list);
-  /*@ ensures cblock(cblock, len, list) &*&
-        (len == 0) ?
-          result == false
-        :
-          result == (c == head(list) || result);
-  @*/
+  //@ ensures cblock(cblock, len, list) &*& result == mem<char>(c, list);
 {
   //@ open cblock(cblock, len, list);
   bool res = array_contains(cblock->arr, cblock->len, c);
@@ -83,10 +75,9 @@ int main()
   //@ ensures true;
 {
   int len = 100;
-  char *arr = malloc(len);
-  if (arr == 0) { abort(); }
+  struct cblock *cblock = create_cblock(len);
   // ...
-  bool res = array_contains(arr, len, 'x');
-  free(arr);
+  bool res = cblock_contains(cblock, 'x');
+  cblock_dispose(cblock);
   return 0;
 }
