@@ -7,18 +7,18 @@ struct cblock {
 };
 
 /*@
-predicate cblock(struct cblock *cblock) =
+predicate cblock(struct cblock *cblock, int len, list<char> list) =
   cblock->pos |-> ?pos &*&
-  cblock->len |-> ?len &*&
+  cblock->len |-> len &*&
   cblock->arr |-> ?arr &*&
-  chars(arr, len, ?list) &*&
+  chars(arr, len, list) &*&
   malloc_block(arr, len) &*&
   malloc_block_cblock(cblock);
 @*/
 
 struct cblock *create_cblock(int len)
   //@ requires len >= 0;
-  //@ ensures cblock(result);
+  //@ ensures cblock(result, len, _);
 {
   struct cblock *cblock = malloc(sizeof(struct cblock));
   if (cblock == 0) { abort(); }
@@ -30,7 +30,7 @@ struct cblock *create_cblock(int len)
   cblock->pos = 0;
   cblock->len = len;
   cblock->arr = arr;
-  //@ close cblock(cblock);
+  //@ close cblock(cblock, len, _);
   return cblock;
 }
 
@@ -55,20 +55,25 @@ bool array_contains(char *arr, int len, char c)
 }
 
 bool cblock_contains(struct cblock *cblock, char c)
-  //@ requires cblock(cblock);
-  //@ ensures cblock(cblock);
+  //@ requires cblock(cblock, ?len, ?list);
+  /*@ ensures cblock(cblock, len, list) &*&
+        (len == 0) ?
+          result == false
+        :
+          result == (c == head(list) || result);
+  @*/
 {
-  //@ open cblock(cblock);
+  //@ open cblock(cblock, len, list);
   bool res = array_contains(cblock->arr, cblock->len, c);
-  //@ close cblock(cblock);
+  //@ close cblock(cblock, len, list);
   return res;
 }
 
 void cblock_dispose(struct cblock *cblock)
-  //@ requires cblock(cblock);
+  //@ requires cblock(cblock, _, _);
   //@ ensures true;
 {
-  //@ open cblock(cblock);
+  //@ open cblock(cblock, _, _);
   free(cblock->arr);
   free(cblock);
 }
