@@ -18,7 +18,7 @@ predicate cblock(struct cblock *cb, int pos, int len, list<char> list) =
 
 struct cblock *create_cblock(int len)
   //@ requires len >= 0;
-  //@ ensures cblock(result, -1, len, ?list) &*& length<char>(list) == len;
+  //@ ensures cblock(result, -1, len, ?list) &*& length(list) == len;
 {
   struct cblock *cb = malloc(sizeof(struct cblock));
   if (cb == 0) {
@@ -38,7 +38,7 @@ struct cblock *create_cblock(int len)
 
 bool array_contains(char *arr, int len, char c)
   //@ requires chars(arr, len, ?list);
-  //@ ensures chars(arr, len, list) &*& result == mem<char>(c, list);
+  //@ ensures chars(arr, len, list) &*& result == mem(c, list);
 {
   //@ open chars(arr, len, list);
   bool res = false;
@@ -53,7 +53,7 @@ bool array_contains(char *arr, int len, char c)
 
 bool cblock_contains(struct cblock *cb, char c)
   //@ requires cblock(cb, ?pos, ?len, ?list);
-  //@ ensures cblock(cb, pos, len, list) &*& result == mem<char>(c, list);
+  //@ ensures cblock(cb, pos, len, list) &*& result == mem(c, list);
 {
   //@ open cblock(cb, pos, len, list);
   bool res = array_contains(cb->arr, cb->len, c);
@@ -63,7 +63,7 @@ bool cblock_contains(struct cblock *cb, char c)
 
 void array_append(char *arr, int len, int pos, char c)
   //@ requires chars(arr, len, ?list) &*& pos >= 0 &*& pos < len;
-  //@ ensures chars(arr, len, ?list0) &*& nth<char>(pos, list0) == c;
+  //@ ensures chars(arr, len, ?list0) &*& nth(pos, list0) == c;
 {
   //@ open chars(arr, len, list);
   if (pos == 0) {
@@ -79,7 +79,7 @@ void cblock_append(struct cblock *cb, char c)
   //@ requires cblock(cb, ?pos, ?len, ?list) &*& pos >= -1;
   /*@ ensures cblock(cb, ?pos0, len, ?list0) &*&
         ((pos + 1) < len) ?
-          pos0 == pos + 1 &*& nth<char>(pos0, list0) == c
+          pos0 == pos + 1 &*& nth(pos0, list0) == c
         :
           pos0 == pos &*& list0 == list;
   @*/
