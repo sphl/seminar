@@ -40,10 +40,12 @@ struct queue {
 
 /*@
 predicate queue(struct queue *q, list<char> values) =
-    q->first |-> ?first &*& q->last |-> ?last &*&
+    q->first |-> ?first &*&
+    q->last |-> ?last &*&
     malloc_block_queue(q) &*&
     lseg(first, last, values) &*&
-    last->next |-> _ &*& last->value |-> _ &*&
+    last->next |-> _ &*&
+    last->value |-> _ &*&
     malloc_block_node(last);
 @*/
 
@@ -63,7 +65,7 @@ predicate ringbuffer(struct ringbuffer *rb, int count, int capacity, list<char> 
 @*/
 
 struct ringbuffer *create(int capacity)
-    //@ requires capacity >= 0;
+    //@ requires capacity > 0;
     //@ ensures ringbuffer(result, 0, capacity, nil);
 {
     struct ringbuffer *rb = malloc(sizeof(struct ringbuffer));
@@ -83,25 +85,31 @@ struct ringbuffer *create(int capacity)
     return rb;
 }
 
-/*
-void enqueue(struct queue *q, char c)
-    //@ requires queue(q, ?vs);
-    //@ ensures queue(q, append(vs, cons(c, nil)));
+void enqueue(struct ringbuffer *rb, char c)
+    //@ requires ringbuffer(rb, ?count, ?capacity, ?vs) &*& capacity > 0;
+    //@ ensures ringbuffer(rb, ?count0, capacity, ?vs0) &*& vs0 == append(vs, cons(c, nil));
 {
-    //@ open queue(q, vs);
+    //@ open ringbuffer(rb, count, _, vs);
+    if (rb->count == rb->capacity) {
+        //@ close ringbuffer(rb, count, _, vs);
+        dequeue(rb);
+        //@ open ringbuffer(rb, count, _, vs);
+    }
+    //@ open queue(rb->fifo, vs);
     struct node *n = malloc(sizeof(struct node));
     if (n == 0) abort();
-    q->last->next = n;
-    q->last->value = c;
-    q->last = n;
-    //@ lseg_add(q->first);
-    //@ close queue(q, _);
+    rb->fifo->last->next = n;
+    rb->fifo->last->value = c;
+    rb->fifo->last = n;
+    rb->count += 1;
+    //@ lseg_add(rb->fifo->first);
+    //@ close queue(rb->fifo, _);
+    //@ close ringbuffer(rb, _, _, _);
 }
-*/
 
 char dequeue(struct ringbuffer *rb)
     //@ requires ringbuffer(rb, ?count, _, ?vs) &*& vs != nil;
-    //@ ensures ringbuffer(rb, ?count0, _, ?vs0) &*& count0 == count - 1 &*& vs == cons(result, vs0);
+    //@ ensures ringbuffer(rb, ?count0, _, ?vs0) &*& vs == cons(result, vs0);
 {
     //@ open ringbuffer(rb, count, _, vs);
     //@ open queue(rb->fifo, _);
