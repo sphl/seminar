@@ -164,6 +164,31 @@ char dequeue(struct queue *q)
   return result;
 }
 
+bool dequeue2(struct queue *q, char *c)
+  //@ requires queue(q, ?vs) &*& character(c, _);
+  /*@
+  ensures queue(q, ?vs0) &*& character(c, _) &*&
+    (length(vs) == 0) ?
+      result == false &*& vs0 == vs
+    :
+      result == true &*& vs0 == tail(vs);
+  @*/
+{
+  int cnt = count(q);
+  if (cnt == 0) {
+    return false;
+  } else {
+    //@ open queue(q, _);
+    struct node *n = q->first;
+    //@ open nodes(n, _, _);
+    *c = n->value;
+    q->first = n->next;
+    free(n);
+    //@ close queue(q, _);
+    return true;
+  }
+}
+
 void dispose(struct queue *q)
   //@ requires queue(q, _);
   //@ ensures true;
