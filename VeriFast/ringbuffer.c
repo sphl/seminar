@@ -47,21 +47,43 @@ predicate queue(struct queue *q, list<char> values) =
     malloc_block_node(last);
 @*/
 
-struct queue *create()
-    //@ requires true;
-    //@ ensures queue(result, nil);
+struct ringbuffer {
+    int count;
+    int capacity;
+    struct queue *fifo;
+};
+
+/*@
+predicate ringbuffer(struct ringbuffer *rb, int count, int capacity, list<char> values) =
+    rb->count |-> count &*&
+    rb->capacity |-> capacity &*&
+    rb->fifo |-> ?fifo &*&
+    queue(fifo, values) &*&
+    malloc_block_ringbuffer(rb);
+@*/
+
+struct ringbuffer *create(int capacity)
+    //@ requires capacity >= 0;
+    //@ ensures ringbuffer(result, 0, capacity, nil);
 {
+    struct ringbuffer *rb = malloc(sizeof(struct ringbuffer));
+    if (rb == 0) abort();
     struct queue *q = malloc(sizeof(struct queue));
     if (q == 0) abort();
     struct node *n = malloc(sizeof(struct node));
     if (n == 0) abort();
     q->first = n;
     q->last = n;
+    rb->count = 0;
+    rb->capacity = capacity;
+    rb->fifo = q;
     //@ close lseg(n, n, nil);
     //@ close queue(q, nil);
-    return q;
+    //@ close ringbuffer(rb, 0, capacity, nil);
+    return rb;
 }
 
+/*
 void enqueue(struct queue *q, char c)
     //@ requires queue(q, ?vs);
     //@ ensures queue(q, append(vs, cons(c, nil)));
@@ -75,21 +97,26 @@ void enqueue(struct queue *q, char c)
     //@ lseg_add(q->first);
     //@ close queue(q, _);
 }
+*/
 
-char dequeue(struct queue *q)
-    //@ requires queue(q, ?vs) &*& vs != nil;
-    //@ ensures queue(q, ?vs0) &*& vs == cons(result, vs0);
+char dequeue(struct ringbuffer *rb)
+    //@ requires ringbuffer(rb, ?count, _, ?vs) &*& vs != nil;
+    //@ ensures ringbuffer(rb, ?count0, _, ?vs0) &*& count0 == count - 1 &*& vs == cons(result, vs0);
 {
-    //@ open queue(q, _);
-    struct node *n = q->first;
+    //@ open ringbuffer(rb, count, _, vs);
+    //@ open queue(rb->fifo, _);
+    struct node *n = rb->fifo->first;
     //@ open lseg(n, _, _);
     char result = n->value;
-    q->first = n->next;
+    rb->fifo->first = n->next;
     free(n);
-    //@ close queue(q, _);
+    rb->count -= 1;
+    //@ close queue(rb->fifo, _);
+    //@ close ringbuffer(rb, _, _, _);
     return result;
 }
 
+/*
 void dispose(struct queue *q)
     //@ requires queue(q, nil);
     //@ ensures true;
@@ -99,6 +126,7 @@ void dispose(struct queue *q)
     free(q->first);
     free(q);
 }
+*/
 
 int main()
     //@ requires true;
@@ -111,6 +139,6 @@ int main()
     assert(x1 == 10);
     int x2 = dequeue(q);
     assert(x2 == 20);
-    dispose(q);
+    //dispose(q);
     return 0;
 }
