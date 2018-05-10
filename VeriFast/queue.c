@@ -6,32 +6,34 @@ struct node {
 };
 
 /*@
-predicate lseg(struct node *first, struct node *last, list<char> values) =
+predicate nodes(struct node *first, struct node *last, list<char> values) =
   first == last ?
       values == nil
   :
       first->next |-> ?next &*&
       first->value |-> ?value &*&
       malloc_block_node(first) &*&
-      lseg(next, last, ?values0) &*&
+      nodes(next, last, ?values0) &*&
       values == cons(value, values0);
+@*/
 
-lemma void lseg_add(struct node *first)
-  requires lseg(first, ?last, ?values) &*&
+/*@
+lemma void nodes_add(struct node *first)
+  requires nodes(first, ?last, ?values) &*&
       last->next |-> ?next &*&
       last->value |-> ?value &*&
       malloc_block_node(last) &*&
       next->next |-> ?nextNext;
-  ensures lseg(first, next, append(values, cons(value, nil)))
+  ensures nodes(first, next, append(values, cons(value, nil)))
       &*& next->next |-> nextNext;
 {
-  open lseg(first, last, values);
+  open nodes(first, last, values);
   if (first == last) {
-      close lseg(next, next, nil);
+      close nodes(next, next, nil);
   } else {
-      lseg_add(first->next);
+      nodes_add(first->next);
   }
-  close lseg(first, next, _);
+  close nodes(first, next, _);
 }
 @*/
 
@@ -45,7 +47,7 @@ predicate queue(struct queue *q, list<char> values) =
   q->first |-> ?first &*&
   q->last |-> ?last &*&
   malloc_block_queue(q) &*&
-  lseg(first, last, values) &*&
+  nodes(first, last, values) &*&
   last->next |-> _ &*&
   last->value |-> _ &*&
   malloc_block_node(last);
@@ -66,7 +68,7 @@ struct queue *create()
   }
   q->first = n;
   q->last = n;
-  //@ close lseg(n, n, nil);
+  //@ close nodes(n, n, nil);
   //@ close queue(q, nil);
   return q;
 }
@@ -76,24 +78,24 @@ bool is_empty(struct queue *q)
   //@ ensures queue(q, vs) &*& result == (vs == nil);
 {
   //@ open queue(q, vs);
-  //@ open lseg(q->first, q->last, vs);
+  //@ open nodes(q->first, q->last, vs);
   bool res = (q->first == q->last);
-  //@ close lseg(q->first, q->last, vs);
+  //@ close nodes(q->first, q->last, vs);
   //@ close queue(q, vs);
   return res;
 }
 
 int nodes_count(struct node *f, struct node *l)
-  //@ requires lseg(f, l, ?vs);
-  //@ ensures lseg(f, l, vs) &*& result == length(vs);
+  //@ requires nodes(f, l, ?vs);
+  //@ ensures nodes(f, l, vs) &*& result == length(vs);
 {
-  //@ open lseg(f, l, vs);
+  //@ open nodes(f, l, vs);
   int res = 0;
   if (f != l) {
     int cnt = nodes_count(f->next, l);
     res = cnt + 1;
   }
-  //@ close lseg(f, l, vs);
+  //@ close nodes(f, l, vs);
   return res;
 }
 
@@ -108,17 +110,17 @@ int count(struct queue *q)
 }
 
 bool nodes_contains(struct node *f, struct node *l, char c)
-  //@ requires lseg(f, l, ?vs);
-  //@ ensures lseg(f, l, vs) &*& result == mem(c, vs);
+  //@ requires nodes(f, l, ?vs);
+  //@ ensures nodes(f, l, vs) &*& result == mem(c, vs);
 {
-  //@ open lseg(f, l, vs);
+  //@ open nodes(f, l, vs);
   bool res = false;
   if (f != l) {
     bool cmp = (f->value == c);
     bool tmp = nodes_contains(f->next, l, c);
     res = (cmp || tmp);
   }
-  //@ close lseg(f, l, vs);
+  //@ close nodes(f, l, vs);
   return res;
 }
 
@@ -144,7 +146,7 @@ void enqueue(struct queue *q, char c)
   q->last->next = n;
   q->last->value = c;
   q->last = n;
-  //@ lseg_add(q->first);
+  //@ nodes_add(q->first);
   //@ close queue(q, _);
 }
 
@@ -154,7 +156,7 @@ char dequeue(struct queue *q)
 {
   //@ open queue(q, _);
   struct node *n = q->first;
-  //@ open lseg(n, _, _);
+  //@ open nodes(n, _, _);
   char result = n->value;
   q->first = n->next;
   free(n);
@@ -171,9 +173,9 @@ void dispose(struct queue *q)
   struct node *l = q->last;
   struct node *n = q->first;
   while (cnt > 0)
-    //@ invariant lseg(n, l, ?vs) &*& cnt == length(vs);
+    //@ invariant nodes(n, l, ?vs) &*& cnt == length(vs);
   {
-    //@ open lseg(n, l, _);
+    //@ open nodes(n, l, _);
     struct node *tmp = n->next;
     free(n);
     n = tmp;
@@ -181,7 +183,7 @@ void dispose(struct queue *q)
   }
   assert(cnt == 0);
   // Don't forget to destroy the last node!
-  //@ open lseg(n, l, _);
+  //@ open nodes(n, l, _);
   free(l);
   free(q);
 }
