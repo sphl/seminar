@@ -22,7 +22,7 @@ lemma void nodes_add(struct node *first)
 }
 @*/
 
-struct queue *create()
+struct queue *create_queue()
   //@ requires true;
   //@ ensures queue(result, nil);
 {
@@ -42,7 +42,7 @@ struct queue *create()
   return q;
 }
 
-bool is_empty(struct queue *q)
+bool queue_is_empty(struct queue *q)
   //@ requires queue(q, ?vs);
   //@ ensures queue(q, vs) &*& result == (vs == nil);
 {
@@ -54,21 +54,7 @@ bool is_empty(struct queue *q)
   return res;
 }
 
-static int nodes_count(struct node *f, struct node *l)
-  //@ requires nodes(f, l, ?vs);
-  //@ ensures nodes(f, l, vs) &*& result == length(vs);
-{
-  //@ open nodes(f, l, vs);
-  int res = 0;
-  if (f != l) {
-    int cnt = nodes_count(f->next, l);
-    res = cnt + 1;
-  }
-  //@ close nodes(f, l, vs);
-  return res;
-}
-
-int count(struct queue *q)
+int queue_count(struct queue *q)
   //@ requires queue(q, ?vs);
   //@ ensures queue(q, vs) &*& result == length(vs);
 {
@@ -78,23 +64,7 @@ int count(struct queue *q)
   return cnt;
 }
 
-
-static bool nodes_contains(struct node *f, struct node *l, char c)
-  //@ requires nodes(f, l, ?vs);
-  //@ ensures nodes(f, l, vs) &*& result == mem(c, vs);
-{
-  //@ open nodes(f, l, vs);
-  bool res = false;
-  if (f != l) {
-    bool cmp = (f->value == c);
-    bool tmp = nodes_contains(f->next, l, c);
-    res = (cmp || tmp);
-  }
-  //@ close nodes(f, l, vs);
-  return res;
-}
-
-bool contains(struct queue *q, char c)
+bool queue_contains(struct queue *q, char c)
   //@ requires queue(q, ?vs);
   //@ ensures queue(q, vs) &*& result == mem(c, vs);
 {
@@ -104,7 +74,7 @@ bool contains(struct queue *q, char c)
   return res;
 }
 
-void enqueue(struct queue *q, char c)
+void queue_enqueue(struct queue *q, char c)
   //@ requires queue(q, ?vs);
   //@ ensures queue(q, append(vs, cons(c, nil)));
 {
@@ -120,14 +90,14 @@ void enqueue(struct queue *q, char c)
   //@ close queue(q, _);
 }
 
-void enqueue2(struct queue *q, char c, int limit)
+void queue_enqueue2(struct queue *q, char c, int limit)
   //@ requires queue(q, ?vs);
   //@ ensures queue(q, ?vs0) &*& last(vs0) == c;
 {
-  if (count(q) == limit) {
+  if (queue_count(q) == limit) {
     // Dequeue first node to not exceed the limit
     char c0;
-    dequeue2(q, &c0);
+    queue_dequeue2(q, &c0);
   }
   //@ open queue(q, _);
   struct node *n = malloc(sizeof(struct node));
@@ -141,7 +111,7 @@ void enqueue2(struct queue *q, char c, int limit)
   //@ close queue(q, _);
 }
 
-char dequeue(struct queue *q)
+char queue_dequeue(struct queue *q)
   //@ requires queue(q, ?vs) &*& vs != nil;
   //@ ensures queue(q, ?vs0) &*& vs == cons(result, vs0);
 {
@@ -155,7 +125,7 @@ char dequeue(struct queue *q)
   return result;
 }
 
-bool dequeue2(struct queue *q, char *c)
+bool queue_dequeue2(struct queue *q, char *c)
   //@ requires queue(q, ?vs) &*& character(c, _);
   /*@
   ensures queue(q, ?vs0) &*& character(c, _) &*&
@@ -165,7 +135,7 @@ bool dequeue2(struct queue *q, char *c)
       result == true &*& vs0 == tail(vs);
   @*/
 {
-  if (count(q) == 0) {
+  if (queue_count(q) == 0) {
     //*c = '\0';
     return false;
   } else {
@@ -180,11 +150,11 @@ bool dequeue2(struct queue *q, char *c)
   }
 }
 
-void destroy(struct queue *q)
+void queue_destroy(struct queue *q)
   //@ requires queue(q, _);
   //@ ensures true;
 {
-  int cnt = count(q);
+  int cnt = queue_count(q);
   //@ open queue(q, _);
   struct node *l = q->last;
   struct node *n = q->first;
@@ -208,39 +178,39 @@ int main()
   //@ requires true;
   //@ ensures true;
 {
-  struct queue *q = create();
-  enqueue(q, 'a');
-  enqueue(q, 'b');
-  enqueue(q, 'c');
-  enqueue(q, 'd');
-  enqueue(q, 'e');
+  struct queue *q = create_queue();
+  queue_enqueue(q, 'a');
+  queue_enqueue(q, 'b');
+  queue_enqueue(q, 'c');
+  queue_enqueue(q, 'd');
+  queue_enqueue(q, 'e');
 
-  char c1 = dequeue(q);
+  char c1 = queue_dequeue(q);
   assert(c1 == 'a');
   
-  char c2 = dequeue(q);
+  char c2 = queue_dequeue(q);
   assert(c2 == 'b');
 
-  bool b1 = contains(q, 'c');
+  bool b1 = queue_contains(q, 'c');
   assert(b1);
 
-  bool b2 = is_empty(q);
+  bool b2 = queue_is_empty(q);
   assert(!b2);
 
-  int n1 = count(q);
+  int n1 = queue_count(q);
   assert(n1 == 3);
 
-  dequeue(q);
-  dequeue(q);
-  dequeue(q);
+  queue_dequeue(q);
+  queue_dequeue(q);
+  queue_dequeue(q);
   
-  bool b3 = is_empty(q);
+  bool b3 = queue_is_empty(q);
   assert(b3);
 
-  enqueue(q, 'e');
-  enqueue(q, 'f');
-  enqueue(q, 'g');
+  queue_enqueue(q, 'e');
+  queue_enqueue(q, 'f');
+  queue_enqueue(q, 'g');
 
-  destroy(q);
+  queue_destroy(q);
   return 0;
 }
