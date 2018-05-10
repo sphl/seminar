@@ -1,33 +1,18 @@
-#include "stdlib.h"
-
-struct node {
-  struct node *next;
-  char value;
-};
-
-/*@
-predicate nodes(struct node *first, struct node *last, list<char> values) =
-  first == last ?
-      values == nil
-  :
-      first->next |-> ?next &*&
-      first->value |-> ?value &*&
-      malloc_block_node(first) &*&
-      nodes(next, last, ?values0) &*&
-      values == cons(value, values0);
-@*/
+#include "queue.h"
 
 /*@
 lemma void nodes_add(struct node *first)
-  requires nodes(first, ?last, ?values) &*&
-      last->next |-> ?next &*&
-      last->value |-> ?value &*&
-      malloc_block_node(last) &*&
-      next->next |-> ?nextNext;
-  ensures nodes(first, next, append(values, cons(value, nil)))
-      &*& next->next |-> nextNext;
+  requires nodes(first, ?last, ?vs) &*&
+    last->next |-> ?next &*&
+    last->value |-> ?val &*&
+    malloc_block_node(last) &*&
+    next->next |-> ?nextNext;
+  ensures nodes(first, next, ?vs0) &*&
+    //vs0 == append(vs, cons(val, nil)) &*&
+    vs0 == reverse(cons(val, reverse(vs))) &*&
+    next->next |-> nextNext;
 {
-  open nodes(first, last, values);
+  open nodes(first, last, vs);
   if (first == last) {
       close nodes(next, next, nil);
   } else {
@@ -35,22 +20,6 @@ lemma void nodes_add(struct node *first)
   }
   close nodes(first, next, _);
 }
-@*/
-
-struct queue {
-  struct node *first;
-  struct node *last;
-};
-
-/*@
-predicate queue(struct queue *q, list<char> values) =
-  q->first |-> ?first &*&
-  q->last |-> ?last &*&
-  malloc_block_queue(q) &*&
-  nodes(first, last, values) &*&
-  last->next |-> _ &*&
-  last->value |-> _ &*&
-  malloc_block_node(last);
 @*/
 
 struct queue *create()
@@ -85,7 +54,7 @@ bool is_empty(struct queue *q)
   return res;
 }
 
-int nodes_count(struct node *f, struct node *l)
+static int nodes_count(struct node *f, struct node *l)
   //@ requires nodes(f, l, ?vs);
   //@ ensures nodes(f, l, vs) &*& result == length(vs);
 {
@@ -109,7 +78,8 @@ int count(struct queue *q)
   return cnt;
 }
 
-bool nodes_contains(struct node *f, struct node *l, char c)
+
+static bool nodes_contains(struct node *f, struct node *l, char c)
   //@ requires nodes(f, l, ?vs);
   //@ ensures nodes(f, l, vs) &*& result == mem(c, vs);
 {
@@ -150,6 +120,27 @@ void enqueue(struct queue *q, char c)
   //@ close queue(q, _);
 }
 
+void enqueue2(struct queue *q, char c, int limit)
+  //@ requires queue(q, ?vs);
+  //@ ensures queue(q, ?vs0) &*& last(vs0) == c;
+{
+  if (count(q) == limit) {
+    // Dequeue first node to not exceed the limit
+    char c0;
+    dequeue2(q, &c0);
+  }
+  //@ open queue(q, _);
+  struct node *n = malloc(sizeof(struct node));
+  if (n == 0) {
+    abort();
+  }
+  q->last->next = n;
+  q->last->value = c;
+  q->last = n;
+  //@ nodes_add(q->first);
+  //@ close queue(q, _);
+}
+
 char dequeue(struct queue *q)
   //@ requires queue(q, ?vs) &*& vs != nil;
   //@ ensures queue(q, ?vs0) &*& vs == cons(result, vs0);
@@ -174,8 +165,8 @@ bool dequeue2(struct queue *q, char *c)
       result == true &*& vs0 == tail(vs);
   @*/
 {
-  int cnt = count(q);
-  if (cnt == 0) {
+  if (count(q) == 0) {
+    //*c = '\0';
     return false;
   } else {
     //@ open queue(q, _);
@@ -189,7 +180,7 @@ bool dequeue2(struct queue *q, char *c)
   }
 }
 
-void dispose(struct queue *q)
+void destroy(struct queue *q)
   //@ requires queue(q, _);
   //@ ensures true;
 {
@@ -207,7 +198,7 @@ void dispose(struct queue *q)
     cnt--;
   }
   assert(cnt == 0);
-  // Don't forget to destroy the last node!
+  // Don't forget to destroy the last node
   //@ open nodes(n, l, _);
   free(l);
   free(q);
@@ -226,19 +217,30 @@ int main()
 
   char c1 = dequeue(q);
   assert(c1 == 'a');
-
+  
   char c2 = dequeue(q);
   assert(c2 == 'b');
 
   bool b1 = contains(q, 'c');
-  assert(b1 == true);
+  assert(b1);
 
   bool b2 = is_empty(q);
-  assert(b2 == false);
+  assert(!b2);
 
   int n1 = count(q);
   assert(n1 == 3);
 
-  dispose(q);
+  dequeue(q);
+  dequeue(q);
+  dequeue(q);
+  
+  bool b3 = is_empty(q);
+  assert(b3);
+
+  enqueue(q, 'e');
+  enqueue(q, 'f');
+  enqueue(q, 'g');
+
+  destroy(q);
   return 0;
 }
