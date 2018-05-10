@@ -1,8 +1,8 @@
 #include "stdlib.h"
 
 struct node {
-    struct node *next;
-    char value;
+  struct node *next;
+  char value;
 };
 
 /*@
@@ -14,7 +14,6 @@ predicate lseg(struct node *first, struct node *last, list<char> values) =
       malloc_block_node(first) &*&
       lseg(next, last, ?values0) &*&
       values == cons(value, values0);
-
 lemma void lseg_add(struct node *first)
   requires lseg(first, ?last, ?values) &*&
       last->next |-> ?next &*& last->value |-> ?value &*&
@@ -33,100 +32,84 @@ lemma void lseg_add(struct node *first)
 }
 @*/
 
-struct fifo {
+struct queue {
   struct node *first;
   struct node *last;
 };
 
 /*@
-predicate fifo(struct fifo *fifo, list<char> values) =
-  fifo->first |-> ?first &*&
-  fifo->last |-> ?last &*&
-  malloc_block_fifo(fifo) &*&
+predicate queue(struct queue *q, list<char> values) =
+  q->first |-> ?first &*& q->last |-> ?last &*&
+  malloc_block_queue(q) &*&
   lseg(first, last, values) &*&
   last->next |-> _ &*& last->value |-> _ &*&
   malloc_block_node(last);
 @*/
 
-struct fifo *create()
+struct queue *create()
   //@ requires true;
-  //@ ensures fifo(result, nil);
+  //@ ensures queue(result, nil);
 {
-  struct fifo *fifo = malloc(sizeof(struct fifo));
-  if (fifo == 0) {
-    abort();
-  }
-  struct node *node = malloc(sizeof(struct node));
-  if (node == 0) {
-    free(fifo);
-    abort();
-  }
-  fifo->first = node;
-  fifo->last = node;
-  //@ close lseg(node, node, nil);
-  //@ close fifo(fifo, nil);
-  return fifo;
+  struct queue *q = malloc(sizeof(struct queue));
+  if (q == 0) abort();
+  struct node *n = malloc(sizeof(struct node));
+  if (n == 0) abort();
+  q->first = n;
+  q->last = n;
+  //@ close lseg(n, n, nil);
+  //@ close queue(q, nil);
+  return q;
 }
 
-int count(struct fifo *fifo)
-  //@ requires fifo(fifo, ?vs);
-  //@ ensures fifo(fifo, vs) &*& result == length(vs);
+void enqueue(struct queue *q, char c)
+  //@ requires queue(q, ?vs);
+  //@ ensures queue(q, append(vs, cons(c, nil)));
 {
-  //@ open fifo(fifo, vs);
-  
+  //@ open queue(q, vs);
+  struct node *n = malloc(sizeof(struct node));
+  if (n == 0) abort();
+  q->last->next = n;
+  q->last->value = c;
+  q->last = n;
+  //@ lseg_add(q->first);
+  //@ close queue(q, _);
 }
 
-void enqueue(struct fifo *fifo, char c)
-  //@ requires fifo(fifo, ?vs);
-  //@ ensures fifo(fifo, ?vs0) &*& vs0 == append(vs, cons(c, nil));
+char dequeue(struct queue *q)
+  //@ requires queue(q, ?vs) &*& vs != nil;
+  //@ ensures queue(q, ?vs0) &*& vs == cons(result, vs0);
 {
-  //@ open fifo(fifo, vs);
-  struct node *node = malloc(sizeof(struct node));
-  if (node == 0) {
-    abort();
-  }
-  fifo->last->next = node;
-  fifo->last->value = c;
-  fifo->last = node;
-  //@ lseg_add(fifo->first);
-  //@ close fifo(fifo, _);
-}
-
-char dequeue(struct fifo *fifo)
-  //@ requires fifo(fifo, ?vs) &*& vs != nil;
-  //@ ensures fifo(fifo, ?vs0) &*& vs == cons(result, vs0);
-{
-  //@ open fifo(fifo, _);
-  struct node *node = fifo->first;
-  //@ open lseg(node, _, _);
-  char result = node->value;
-  fifo->first = node->next;
-  free(node);
-  //@ close fifo(fifo, _);
+  //@ open queue(q, _);
+  struct node *n = q->first;
+  //@ open lseg(n, _, _);
+  char result = n->value;
+  q->first = n->next;
+  free(n);
+  //@ close queue(q, _);
   return result;
 }
 
-void dispose(struct fifo *fifo)
-  //@ requires fifo(fifo, nil);
+void dispose(struct queue *q)
+  //@ requires queue(q, nil);
   //@ ensures true;
 {
-  //@ open fifo(fifo, nil);
+  //@ open queue(q, nil);
   //@ open lseg(_, _, _);
-  free(fifo->first);
-  free(fifo);
+  free(q->first);
+  free(q);
 }
 
 int main()
   //@ requires true;
   //@ ensures true;
 {
-  struct fifo *fifo = create();
-  enqueue(fifo, 'a');
-  enqueue(fifo, 'b');
-  char c1 = dequeue(fifo);
+  struct queue *q = create();
+  enqueue(q, 'a');
+  enqueue(q, 'b');
+  char c1 = dequeue(q);
   assert(c1 == 'a');
-  char c2 = dequeue(fifo);
+  char c2 = dequeue(q);
   assert(c2 == 'b');
-  dispose(fifo);
+  dispose(q);
   return 0;
 }
