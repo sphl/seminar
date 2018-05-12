@@ -14,21 +14,70 @@ Im Rahmen dieser Seminararbeit werden wir uns hauptsächlich mit dem Verifikatio
 
 \subsection{Sprachkonstrukte}
 
+In diesem Abschnitt möchten wir uns mit einigen (Sprach-)Konzepten beschäftigten welche VeriFast für die Programmverifikation bereitstellt. Dabei werden ausschließlich die Konzepte vorgestellt, welche für das Verständnis des Beispiels aus \cref{subsec:queue} relevant sind. Weiterführende Konzepte und Beispiele können in \cite{Jacobs2017} nachgelesen werden.
+
 \subsubsection{Induktive Datentypen}
+\label{subsec:adt}
+
+Eines der wichtigsten Hilfsmittel um die Korrektheit von Programme nachweisen zu können besteht in der Spezifikation von abstrakten Datentypen (ADT). Dadurch ist es möglich, Eigenschaften und Operationen eines Datentyps auf einem höheren Abstraktionsniveau, d.h. unabhängig von einer konkreten Implementierung auf einem Computer, zu betrachten. Daraus resultierend können ADTs in der Programmverifikation als Repräsentanten für konkrete Datenstrukturen, wie beispielsweise Array oder einfach/doppelt verkettete Listen, eingesetzt werden. \cite[S. 265]{Saake2014}
+
+VeriFast unterstützt dabei induktiven Datentypen, deren Instanzen über die Konkatenation der definierten Konstruktoren (Konstruktorterm) gebildet werden. Die Spezifikation einer abstrakten Liste kann im nachfolgenden Beispiel gesehen werden.
+
+\begin{lstlisting}
+inductive list<t> = nil | cons(t, list<t>);
+\end{lstlisting}
+
+\noindent
+In unserem oberen Beispiel definieren wir eine generische Liste mit den Konstruktoren \texttt{nil} für die leere Liste und \texttt{cons} für die zusammengesetzte Liste mit \texttt{t} als Kopfelement und \texttt{list<t>} als Restliste. Analog zu den meisten Programmiersprachen spezifiziert \texttt{<t>} den generischen Datentyp, wodurch Listen über \texttt{int}, \texttt{char}, \texttt{bool} etc. gebildet werden können. So entspricht der Konstruktorterm \texttt{cons('a', cons('b', cons('c', nil)))} einer Liste mit der Zeichenfolge \texttt{<'a', 'b', 'c'>}.
+
+\subsubsection{Fixpunkt Funktionen}
+
+Neben den induktiven ADTs unterstützt VeriFast die Spezifikation von Fix\-punkt-Funktionen, wodurch spezifische Operation auf abstrakten Datentypen ausgeführt werden können. Diese werden mit \texttt{fixpoint} eingeleitet und erhalten über die Parameterliste einen oder mehrere ADTs. Im Funktionsrumpf kann entweder eine \texttt{return}-Anweisung, welche die berechnete Eigenschaft direkt an den Aufrufer zurückgibt, oder eine \texttt{switch}-Anweisung stehen. Letztere führt eine Fallunterscheidung bezüglich aller Konstruktoren von genau einem induktiven Argument (Fixpunkt) aus. Zudem prüft VeriFast jede Funktion auf Terminierung - d.h. im Falle eines rekursiven Aufrufs muss der neue Fixpunkt ein Teilterm des alten Konstruktorterms sein. \cite{Jacobs2010}
+
+Ausgehend von der induktiven Liste aus \cref{subsec:adt}, definieren wir nun die beiden Funktionen \texttt{head} und \texttt{tail} welche das Kopfelement bzw. die Restliste des Fixpunkts \texttt{xs} zurückliefert.
+
+\begin{lstlisting}
+fixpoint t head<t>(list<t> xs) {
+  switch (xs) {
+    case nil: return default_value<t>;
+    case cons(x, xs0): return x;
+  }
+}
+
+fixpoint list<t> tail<t>(list<t> xs) {
+  switch (xs) {
+    case nil: return nil;
+    case cons(x, xs0): return xs0;
+  }
+}
+\end{lstlisting}
+
+\noindent
+Für den Konstruktor \texttt{cons(t, list<t>)} bindet VeriFast die entsprechenden Werte an die Variablen \texttt{x} und \texttt{xs0}, welche im Anschluss beliebig weiterverwendet werden können. Ein Sonderfall in diesem Beispiel bildet der Konstruktor \texttt{nil} in \texttt{head}. Hierbei wird ein Defaultwert zurückgegeben, welcher je nach Anforderung und Datentyp unterschiedliche Werte annehmen kann.
+
+Eine weitere bekannte Funktion auf Datentypen ist \texttt{length}, welche in unserem Beispiel die Länge einer Liste rekursiv berechnet. D.h. wurde ein Term ungleich \texttt{nil} übergeben, so wird dieser sukzessive abgebaut und zugleich die Länge um den Wert 1 erhöht. Der letzte Aufruf endet immer im \texttt{nil}-Konstruktor, welcher folgerichtig den die Länge 0 zurückgibt und damit die Berechnung abschließt.\footnote{\texttt{head}, \texttt{tail}, \texttt{length} und weitere Fixpunkt-Operation auf \texttt{list<t>} sind Bestandteil der VeriFast-Bibliothek.}
+
+\begin{lstlisting}
+fixpoint int length<t>(list<t> xs) {
+  switch (xs) {
+    case nil: return 0;
+    case cons(x, xs0): return 1 + length(xs0);
+  }
+}
+\end{lstlisting}
 
 \subsubsection{malloc\_block Einheiten}
 
 \subsubsection{Prädikate}
 
-\subsubsection{Fixpunkt Funktionen}
-
-\subsubsection{Lemma Funktionen}
-
 \subsubsection{Kontrakte}
 
 \subsubsection{Schleifeninvarianten}
 
-\subsection{Verifikation -- Binärsuche}
+\subsubsection{Lemma Funktionen}
+
+\subsection{Verifikation -- Queue}
+\label{subsec:queue}
 
 \subsection{Praxis Fallstudien}
 

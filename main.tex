@@ -4,7 +4,11 @@
 \usepackage[T1]{fontenc} % Output font encoding for international characters
 \usepackage[ngerman]{babel}
 
-%\usepackage{mathpazo} % Palatino font
+\usepackage{lmodern}
+
+\usepackage{listings}
+\lstset{language=c,columns=fullflexible,basicstyle=\ttfamily,xleftmargin=10pt}
+\lstset{moredelim=**[s][\itshape]{/*}{*/},moredelim=**[l][\itshape]{//},morekeywords={requires,ensures,true,false,predicate,lemma,fixpoint,predicate_ctor,leak,open,close,bool,invariant,inductive,assert,predicate_family,predicate_family_instance}}
 
 \usepackage{graphicx}
 \graphicspath{{Bilder/}}
@@ -22,11 +26,15 @@
 
 \include{titelseite}
 
-\include{zusammenfassung}
+\include{zitat}
+
+%\include{zusammenfassung}
 
 \tableofcontents
 
 \input{inhalte}
+
+%\listoffigures
 
 \printbibliography
 
