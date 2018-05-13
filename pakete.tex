@@ -1,0 +1,35 @@
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[ngerman]{babel}
+
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{graphicx}
+\graphicspath{{Bilder/}}
+
+\usepackage{listings}
+% Die Formattierung der Listings wurde aus dem VeriFast Tutorial übernommen
+\lstset{
+	language    = c,
+	columns     = fullflexible,
+	basicstyle  = \ttfamily,
+	xleftmargin = 10pt
+}
+\lstset{
+	moredelim    = **[s][\itshape]{/*}{*/},
+	moredelim    = **[l][\itshape]{//},
+	morekeywords = {requires,ensures,true,false,predicate,lemma,fixpoint,predicate_ctor,leak,open,close,bool,invariant,inductive,assert,predicate_family,predicate_family_instance}
+}
+
+\usepackage[ngerman]{varioref}
+\usepackage{hyperref}
+\usepackage[ngerman]{cleveref}
+
+\usepackage[
+	backend  = biber,
+	hyperref = true,
+	style    = alphabetic
+]{biblatex}
+\addbibresource{quellen.bib}
+
+\usepackage{hyperref}
