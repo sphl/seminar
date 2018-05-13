@@ -68,6 +68,74 @@ fixpoint int length<t>(list<t> xs) {
 
 \subsubsection{malloc\_block Einheiten}
 
+Charakteristisch für die Programmiersprache C ist die Speicherallokation mittels malloc, wodurch eine festgelegte Menge von Bytes vom Heap-Speicher angefordert werden kann und falls erfolgreich alloziert, ein Zeiger auf den Beginn des Speicherblocks zurückgegeben wird. Dies macht es allerdings erforderlich, dass der Programmierer manuell angeforderte Speicherblöcke mit Hilfe von free freigibt, falls diese nicht mehr benötigt werden.
+
+Die Verwaltung der beiden Speicherbereich Heap und Stack gilt es auch bei der Programmverifikation zu berücksichtigen, weshalb VeriFast bei der symbolischen Ausführung dynamische allozierte Speicherstrukturen in Form von malloc\_block chunks auf dem symbolischen Heap ablegt. Im Falle eines structs wird dabei nicht nur ein chunk für Instanz der Datenstruktur angelegt, alle enthalten Felder erhalten ebenfalls einen Eintrag auf dem Heap. Welche chunks auf dem Heap liegen ist für die Verifikation von großer Bedeutung, da beispielsweise ein free nur dann erlaubt ist, wenn zuvor ein malloc\_block Eintrag auf dem Heap liegt. Die gleiche Datenstruktur könnte auch lokal instanziert worden sein (d.h. kein malloc\_block chunk), dass dann zu einem Fehler führen würde, wenn deren Adresse an free übergeben wird.
+
+Im nachfolgenden Beispiel ist das struct node zu sehen, welche einen Knoten einer einfach verketteten Liste darstellt und dabei ein Zeichen speichert, und queue, welche jeweils die Adresse des ersten und letzten Listenelements speichert und somit die Grundstruktur für eine Queue implementiert.
+
+\noindent
+\begin{minipage}{.45\textwidth}
+\begin{lstlisting}
+struct node {
+  struct node *next;
+  char value;
+};
+\end{lstlisting}
+\end{minipage}
+\hfill
+\begin{minipage}{.45\textwidth}
+\begin{lstlisting}
+struct queue {
+  struct node *first;
+  struct node *last;
+};
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+Die Funktion create\_queue\footnote{\texttt{requires}, \texttt{ensures} und \texttt{close} werden in den darauffolgenden Abschnitten erklärt und können in diesem Beispiel übersprungen werden.} legt eine leere Queue auf dem Heap an, indem sie eine Queue alloziert und anschließend first und last den gleichen Knoten zu. Abschließend wird die Adresse der neu erstellten Queue an den Aufrufer zurückgeben.
+
+\begin{lstlisting}
+struct queue *create_queue()
+  //@ requires true;
+  //@ ensures queue(result, nil);
+{
+  struct queue *q = malloc(sizeof(struct queue));
+  if (q == 0) { abort(); }
+  struct node *n = malloc(sizeof(struct node));
+  if (n == 0) { abort(); }
+  q->first = n;
+  q->last = n;
+  //@ close nodes(n, n, nil);
+  //@ close queue(q, nil);
+  return q;
+}
+\end{lstlisting}
+
+\noindent
+Nach Ausführung dieser Funktion liegen folgende chunks auf dem Heap:
+
+{\setlength\extrarowheight{5pt} % Vergroeßert den Zeilenabstand
+\begin{table}[hbt!]
+	\centering
+	\begin{tabular}{|l|l|}
+		\hline
+		\rowcolor[HTML]{EFEFEF}
+		% ----------------------------------------------------------------------------------------------------
+		\textbf{Chunk}                   & \textbf{Beschreibung}                                     \\ \hline
+		% ----------------------------------------------------------------------------------------------------
+		\texttt{malloc\_block\_node(n)}  & Dynamisch allozierte Instanz \texttt{n}                   \\ \hline
+		\texttt{malloc\_block\_queue(q)} & Dynamisch allozierte Instanz \texttt{q}                   \\ \hline
+		\texttt{n->next |-> value1}      & Feld \texttt{next} hat symbolischen Wert \texttt{value1}  \\ \hline
+		\texttt{n->value |-> value2}     & Feld \texttt{value} hat symbolischen Wert \texttt{value2} \\ \hline
+		\texttt{q->first |-> n}          & Feld \texttt{first} zeigt auf Instanz \texttt{n}          \\ \hline
+		\texttt{q->last |-> n}           & Feld \texttt{last} zeigt auf Instanz \texttt{n}           \\ \hline
+		% ----------------------------------------------------------------------------------------------------
+	\end{tabular}
+\end{table}
+}
+
 \subsubsection{Prädikate}
 
 \subsubsection{Kontrakte}
