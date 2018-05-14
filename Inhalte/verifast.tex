@@ -1,6 +1,6 @@
 \section{VeriFast}
 
-Im Rahmen dieser Seminararbeit werden wir uns hauptsächlich mit dem Verifikationswerkzeug \emph{VeriFast} auseinandersetzen, dass in Form eines Prototypen an der KU Leuven ins Leben gerufen wurde und bis heute, Stand 2018, aktiv weiterentwickelt wird. VeriFast erlaubt die Verifikation von \emph{single-} und \emph{multithreaded} C und Java Programmen, welche mit zusätzlichen Annotationen, für die Verifikation bestimmter Korrektheitseigenschaften, ausgestattet sind. Die Annotationen stehen dabei innerhalb von Kommentaren, wodurch der verifizierte C Code ohne zusätzliche Änderungen kompiliert werden kann. Während der Ausführung von VeriFast wird das Programm auf illegale Speicherzugriffe, beispielsweise durch Dereferenzierung von Null-Pointern oder durch Zugriff auf Speicherzellen außer der Grenzen eines Arrays, sowie Fehler aufgrund nebenläufiger Ausführung geprüft. Darüber hinaus untersucht VeriFast die annotierten Methoden-Kontrakte - d.h. es wird versucht zu zeigen, dass sich die spezifizierte Nachbedingung aus der Vorbedingung und der symbolischen Ausführung des Methodenrumpfs ableiten lässt. \cite{Jacobs2010}
+Im Rahmen dieser Seminararbeit werden wir uns hauptsächlich mit dem Verifikationswerkzeug \emph{VeriFast} auseinandersetzen, dass in Form eines Prototypen an der KU Leuven ins Leben gerufen wurde und aktiv weiterentwickelt wird. VeriFast erlaubt die Verifikation von \emph{single-} und \emph{multithreaded} C und Java Programmen, welche mit zusätzlichen Annotationen für die Verifikation bestimmter Korrektheitseigenschaften ausgestattet sind. Die Annotationen stehen innerhalb von Kommentaren, wodurch der verifizierte C Code ohne zusätzliche Änderungen kompiliert werden kann. Während der Ausführung von VeriFast wird das Programm auf illegale Speicherzugriffe, beispielsweise durch Dereferenzierung von Null-Pointern oder durch Zugriff auf Speicherzellen außer der Grenzen eines Arrays, sowie Fehler aufgrund nebenläufiger Ausführung geprüft. Darüber hinaus verifiziert VeriFast die annotierten Methoden-Kontrakte - d.h. es wird versucht zu zeigen, dass sich die Nachbedingung aus der Vorbedingung und der symbolischen Ausführung des Methodenrumpfs ergibt. \cite{Jacobs2010}
 
 \begin{figure}[!hbt]
 	\centering
@@ -10,31 +10,31 @@ Im Rahmen dieser Seminararbeit werden wir uns hauptsächlich mit dem Verifikatio
 \end{figure}
 
 \noindent
-Über die VeriFast IDE (siehe \vref{fig:vfide}) können Quellcodedateien modifiziert und Programme schrittweise oder in einem Durchlauf verifiziert werden. Im Falle eines Fehlers werden diese innerhalb des Editors lokalisiert und anhand einer Statusmeldung dem Benutzer mitgeteilt. Wurde die Verifikation erfolgreich durchlaufen, so können abhängig von der ausgewählten Funktion die getesteten Pfade in Form eines Ausführungsbaums am rechten Fensterrand angezeigt werden. Dieser erlaubt es, durch anklicken eines Blattknotens, einzelne Pfad genauer zu untersuchen. Die \emph{Steps}-Auswahl (unten links) listet dabei die ausgeführten Schritte eines Pfades auf und erlaubt Sprünge zu vorherigen bzw. nachfolgenden Zuständen. In dem Auswahlfenster nebenan befinden sich die logischen Annahmen, die sich dynamisch zur Ausführung aus den Annotationen und dem C Code ergeben. Eine weitere Besonderheit der IDE sind die \emph{heap chunks} (unten rechts), welche den symbolischen Zustand des Heap-Speichers abhängig von den Ausführungsschritt anzeigt. Direkt neben dem Editor befindet sich eine weitere Auswahl, welche einen Überblick über die Zuordnung der lokalen Variablen auf deren symbolischen Werte gibt. \cite{Jacobs2017}
+Über die VeriFast IDE (siehe \vref{fig:vfide}) können Quellcodedateien editiert und Programme schrittweise/in einem Durchlauf verifiziert werden. Im Falle eines Fehlers werden diese innerhalb des Editors lokalisiert und anhand einer Statusmeldung dem Benutzer mitgeteilt. Wurde die Verifikation erfolgreich durchlaufen, so können abhängig von der ausgewählten Funktion die getesteten Pfade in Form eines Ausführungsbaums angezeigt werden. Zudem ermöglicht VeriFast über das Anklicken eines Blattknotens die Analyse einzelner Pfade. Die \emph{steps}-Auswahl listet hierbei die ausgeführten Schritte eines Pfades auf und erlaubt Sprünge zu vorherigen bzw. nachfolgenden Zuständen. Nebenan befinden sich die logischen Annahmen (\emph{assumptions}), die sich aus den Annotationen und dem ausgeführten C Code ergeben. Eine Besonderheit der IDE ist die Anzeige der \emph{heap chunks}, welche abhängig vom Ausführungsschritt den symbolischen Zustand des Heap-Speichers darstellen. Darüber befindet sich eine weitere Auswahl, welche einen Überblick über die Zuordnung der lokalen Variablen auf deren symbolischen Werte gibt. \cite{Jacobs2017}
 
 \subsection{Sprachkonstrukte}
 
-In diesem Abschnitt möchten wir uns mit einigen (Sprach-)Konzepten beschäftigten welche VeriFast für die Programmverifikation bereitstellt. Dabei werden ausschließlich die Konzepte vorgestellt, welche für das Verständnis des Beispiels aus \cref{subsec:queue} relevant sind. Weiterführende Konzepte und Beispiele können in \cite{Jacobs2017} nachgelesen werden.
+In diesem Abschnitt werden einige (Sprach-)Konzepte vorgestellt die VeriFast für die Programmverifikation bereitstellt. Dabei werden vorzugsweise die Konzepte behandelt, welche für das Verständnis des Beispiels in \cref{subsec:queue} relevant sind. Weiterführende Konzepte und Beispiele können in \cite{Jacobs2017} nachgelesen werden.
 
 \subsubsection{Induktive Datentypen}
 \label{subsec:adt}
 
-Eines der wichtigsten Hilfsmittel um die Korrektheit von Programme nachweisen zu können besteht in der Spezifikation von abstrakten Datentypen (ADT). Dadurch ist es möglich, Eigenschaften und Operationen eines Datentyps auf einem höheren Abstraktionsniveau, d.h. unabhängig der konkreten Implementierung auf einem Computer, zu betrachten. Daraus resultierend können ADTs in der Programmverifikation als Repräsentanten für konkrete Datenstrukturen, wie beispielsweise Array oder einfach/doppelt verkettete Listen, eingesetzt werden. \cite[S. 265]{Saake2014}
+Eines der wichtigsten Hilfsmittel um die Korrektheit von Programme nachzuweisen, besteht in der Spezifikation von abstrakten Datentypen (ADT). Diese ermöglichen es, Eigenschaften und Operationen eines Datentyps auf einem höheren Abstraktionsniveau, d.h. unabhängig der konkreten Implementierung auf einem Computer, zu betrachten. Daraus resultierend können ADTs in der Programmverifikation als Repräsentanten für konkrete Datenstrukturen, wie beispielsweise Array oder einfach/doppelt verkettete Listen, eingesetzt werden. \cite[S. 265]{Saake2014}
 
-VeriFast unterstützt den Einsatz von induktiven Datentypen, deren Instanzen über die Konkatenation der definierten Konstruktoren (Konstruktorterm) gebildet werden. Die Spezifikation einer abstrakten Liste sieht dabei wie folgt aus.
+VeriFast unterstützt den Einsatz von induktiven Datentypen, deren Instanzen über die Konkatenation von Konstruktoren (Konstruktorterm) gebildet werden. Die Spezifikation einer abstrakten Liste sieht dabei wie folgt aus.
 
 \begin{lstlisting}
 inductive list<t> = nil | cons(t, list<t>);
 \end{lstlisting}
 
 \noindent
-In unserem Beispiel definieren wir eine generische Liste mit den Konstruktoren \texttt{nil} für die leere Liste und \texttt{cons} für die zusammengesetzte Liste mit \texttt{t} als Kopfelement und \texttt{list<t>} als Restliste. Analog zu den meisten Programmiersprachen spezifiziert \texttt{<t>} den generischen Datentyp, wodurch Listen über \texttt{int}, \texttt{char}, \texttt{bool} etc. gebildet werden können. So entspricht der Konstruktorterm \texttt{cons('a', cons('b', cons('c', nil)))} einer Liste mit der Zeichenfolge \texttt{<'a', 'b', 'c'>}.
+In diesem Beispiel wurde eine generische Liste mit den Konstruktoren \texttt{nil} für die leere Liste und \texttt{cons} für die zusammengesetzte Liste, mit Kopfelement \texttt{t} und Restliste \texttt{list<t>}, definiert. Analog zu den meisten Programmiersprachen spezifiziert \texttt{<t>} den generischen Datentyp, wodurch Listen über \texttt{int}, \texttt{char}, \texttt{bool} etc. konstruiert werden können. So entspricht der Konstruktorterm \texttt{cons('a', cons('b', cons('c', nil)))} einer Liste mit der Zeichenfolge \texttt{<'a', 'b', 'c'>}.
 
 \subsubsection{Fixpunkt Funktionen}
 
-Neben den induktiven ADTs unterstützt VeriFast die Spezifikation von Fix\-punkt-Funktionen, wodurch spezifische Operation auf induktive Datentypen ausgeführt werden können. Diese werden mit \texttt{fixpoint} eingeleitet und erhalten über die Parameterliste einen oder mehrere ADTs. Im Funktionsrumpf kann entweder direkt eine \texttt{return}-Anweisung, welche die berechnete Eigenschaft direkt an den Aufrufer zurückgibt, oder eine \texttt{switch}-Anweisung stehen. Letztere führt eine Fallunterscheidung bezüglich aller Konstruktoren von genau einem induktiven Argument (Fixpunkt) aus. Zudem prüft VeriFast jede Funktion auf Terminierung - d.h. im Falle eines rekursiven Aufrufs muss der neue Fixpunkt ein Teilterm des alten Konstruktorterms sein. \cite{Jacobs2010}
+Neben den induktiven ADTs unterstützt VeriFast die Spezifikation von Fix\-punkt-Funktionen, wodurch spezifische Operation auf induktive Datentypen ausgeführt werden können. Diese werden mit \texttt{fixpoint} eingeleitet und erhalten über die Parameterliste einen oder mehrere ADTs. Im Funktionsrumpf kann entweder direkt eine \texttt{return}-Anweisung, welche die berechnete Eigenschaft an den Aufrufer zurückgibt, oder eine \texttt{switch}-Anweisung stehen. Letztere führt eine Fallunterscheidung bezüglich aller Konstruktoren von genau einem induktiven Argument (Fixpunkt) aus. Zudem prüft VeriFast jede Funktion auf Terminierung - d.h. im Falle eines rekursiven Aufrufs muss der neue Fixpunkt ein Teilterm des alten Konstruktorterms sein. \cite{Jacobs2010}
 
-Ausgehend von der induktiven Liste aus \cref{subsec:adt}, definieren wir nun die beiden Funktionen \texttt{head} und \texttt{tail} welche das Kopfelement bzw. die Restliste des Fixpunkts \texttt{xs} zurückliefern.
+Ausgehend von der induktiven Liste in \cref{subsec:adt}, definieren wir die beiden Funktionen \texttt{head} und \texttt{tail}, welche das Kopfelement bzw. die Restliste des Fixpunkts \texttt{xs} zurückliefern.
 
 \begin{lstlisting}
 fixpoint t head<t>(list<t> xs) {
@@ -53,9 +53,9 @@ fixpoint list<t> tail<t>(list<t> xs) {
 \end{lstlisting}
 
 \noindent
-Für den Konstruktor \texttt{cons(t, list<t>)} bindet VeriFast die entsprechenden Werte an die Variablen \texttt{x} und \texttt{xs0}, welche im Anschluss beliebig weiterverwendet werden können. Ein Sonderfall in diesem Beispiel bildet der Konstruktor \texttt{nil} in \texttt{head}. Hierbei wird ein Defaultwert zurückgegeben, welcher je nach Anforderung und Datentyp unterschiedliche Werte annehmen kann.
+Für den Konstruktor \texttt{cons(t, list<t>)} bindet VeriFast die entsprechenden Werte an die Variablen \texttt{x} und \texttt{xs0}, welche im Anschluss beliebig weiterverwendet werden können. Ein Sonderfall in diesem Beispiel ist der Konstruktor \texttt{nil} in \texttt{head}. Hierbei wird ein Defaultwert zurückgegeben, der je nach Anforderung und Datentyp unterschiedliche Werte annehmen kann.
 
-Eine weitere bekannte Funktion auf Container-Datentypen ist \texttt{length}, welche in unserem Beispiel die Länge einer Liste rekursiv berechnet. Wurde ein Term ungleich \texttt{nil} übergeben, so wird dieser sukzessive abgebaut und zugleich die Länge um den Wert 1 erhöht. Der letzte Aufruf endet somit immer im \texttt{nil}-Konstruktor, welcher folgerichtig den die Länge 0 zurückgibt und damit die Berechnung abschließt.\footnote{\texttt{head}, \texttt{tail}, \texttt{length} und weitere Fixpunkt-Operation auf \texttt{list<t>} sind Bestandteil der VeriFast-Bibliothek.}
+Eine weitere bekannte Funktion auf Container-Datentypen ist \texttt{length}, welche in diesem Beispiel die Länge einer Liste rekursiv berechnet. Wurde ein Term ungleich \texttt{nil} übergeben, so wird dieser sukzessive abgebaut und zugleich die Länge um den Wert 1 erhöht. Der letzte Aufruf endet immer im \texttt{nil}-Konstruktor, welcher folgerichtig den die Länge 0 zurückgibt und damit die Berechnung abschließt.\footnote{\texttt{head}, \texttt{tail}, \texttt{length} und weitere Fixpunkt-Operation auf \texttt{list<t>} sind Bestandteil der VeriFast-Bibliothek.}
 
 \begin{lstlisting}
 fixpoint int length<t>(list<t> xs) {
@@ -68,7 +68,7 @@ fixpoint int length<t>(list<t> xs) {
 
 \subsubsection{malloc\_block Einheiten}
 
-Charakteristisch für die Programmiersprache C ist die dynamische Speicherverwaltung mittels \texttt{malloc} und \texttt{free}. Dies erlaubt es eine festgelegte Anzahl an Bytes anzufordern, welche, falls erfolgreich vom Betriebssystem alloziert, über einen Zeigen auf den Heap-Speicher angesprochen werden können. Da C über keine automatische Garbage Collection (GC) verfügt, ist hier der Programmierer in Pflicht den Speicherbereich mit Hilfe von \texttt{free} manuell zu räumen, falls dieser nicht mehr benötigt wird.
+Charakteristisch für C ist die dynamische Speicherverwaltung mittels \texttt{malloc} und \texttt{free}. Dadurch kann eine festgelegte Anzahl an Bytes angefordert und falls erfolgreich vom Betriebssystem alloziert, über einen Zeigen auf den Heap-Speicher angesprochen werden. Da C über keine automatische Garbage Collection (GC) verfügt, steht der Programmierer in der Pflicht den Speicherbereich manuell mit Hilfe von \texttt{free} zu räumen, falls dieser nicht mehr benötigt wird.
 
 Den Zustand des Heap-Speichers gilt es auch bei der Verifikation von Programmen zu berücksichtigen. Hierbei legt VeriFast sogenannte \emph{chunks} auf dem symbolischen Heap ab, wann immer eine Datenstruktur während der symbolischen Ausführung alloziert wird. Instanzen die über \texttt{malloc} erzeugt wurden, erhalten dabei zusätzlich einen \texttt{malloc\_block} chunk. Über diesen Mechanismus kann vor der Freigabe überprüft werden, ob die zu löschende Instanz über einen gültigen \texttt{malloc\_block} Eintrag verfügt. \cite{Jacobs2010,Jacobs2017}
 
@@ -93,8 +93,8 @@ struct queue {
 \end{lstlisting}
 \end{minipage}
 
-\noindent
-Die Funktion create\_queue\footnote{\texttt{requires}, \texttt{ensures} und \texttt{close} werden erst in den darauffolgenden Abschnitten erklärt und können in diesem Beispiel übersprungen werden.} legt eine leere Queue auf dem Heap an, indem sie eine Queue alloziert und anschließend first und last den gleichen Knoten zu. Abschließend wird die Adresse der neu erstellten Queue an den Aufrufer zurückgeben.
+%\noindent
+%Die Funktion create\_queue\footnote{\texttt{requires}, \texttt{ensures} und \texttt{close} werden erst in den darauffolgenden Abschnitten erklärt und können in diesem Beispiel übersprungen werden.} legt eine leere Queue auf dem Heap an, indem sie eine Queue alloziert und anschließend first und last den gleichen Knoten zu. Abschließend wird die Adresse der neu erstellten Queue an den Aufrufer zurückgeben.
 
 \begin{lstlisting}
 struct queue *create_queue()
@@ -113,8 +113,8 @@ struct queue *create_queue()
 }
 \end{lstlisting}
 
-\noindent
-Nach Ausführung dieser Funktion liegen folgende chunks auf dem Heap:
+%\noindent
+%Nach Ausführung dieser Funktion liegen folgende chunks auf dem Heap:
 
 {\setlength\extrarowheight{5pt} % Vergroeßert den Zeilenabstand
 \begin{table}[hbt!]
