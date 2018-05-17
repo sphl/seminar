@@ -93,8 +93,8 @@ struct queue {
 \end{lstlisting}
 \end{minipage}
 
-%\noindent
-%Die Funktion create\_queue\footnote{\texttt{requires}, \texttt{ensures} und \texttt{close} werden erst in den darauffolgenden Abschnitten erklärt und können in diesem Beispiel übersprungen werden.} legt eine leere Queue auf dem Heap an, indem sie eine Queue alloziert und anschließend first und last den gleichen Knoten zu. Abschließend wird die Adresse der neu erstellten Queue an den Aufrufer zurückgeben.
+\noindent
+Die Funktion \texttt{create\_queue}\footnote{\texttt{requires}, \texttt{ensures} und \texttt{close} werden erst in den darauffolgenden Abschnitten erklärt und können in diesem Beispiel übersprungen werden.} alloziert Heap-Speicher für eine neue Queue und weist den Variablen \texttt{first} und \texttt{last} initial den gleichen Knoten zu. Abschließend wird der Zeiger auf die Queue an den Aufrufer zurückgegeben. 
 
 \begin{lstlisting}
 struct queue *create_queue()
@@ -113,8 +113,8 @@ struct queue *create_queue()
 }
 \end{lstlisting}
 
-%\noindent
-%Nach Ausführung dieser Funktion liegen folgende chunks auf dem Heap:
+\noindent
+\cref{tab:heap-chunks} zeigt einen Ausschnitt des symbolischen Heap-Speichers während der Ausführung von \texttt{create\_queue}. Dabei stehen die symbolischen Werte \texttt{value1} und \texttt{value2} für beliebige Werte, da keine konkrete Zuweisung für die Variablen \texttt{next} und \texttt{value} des Knotens \texttt{n} vorgenommen wurde.
 
 {\setlength\extrarowheight{5pt} % Vergroeßert den Zeilenabstand
 \begin{table}[hbt!]
@@ -133,12 +133,20 @@ struct queue *create_queue()
 		\texttt{q->last |-> n}           & Feld \texttt{last} zeigt auf Instanz \texttt{n}           \\ \hline
 		% ----------------------------------------------------------------------------------------------------
 	\end{tabular}
+	\caption{Heap chunks}
+	\label{tab:heap-chunks}
 \end{table}
 }
 
-\subsubsection{Prädikate}
-
 \subsubsection{Kontrakte}
+
+Kontrakte beschreiben einen Vertrag zwischen dem Aufrufer einer Methode und der Methode selbst. Dabei besitzt jede Methodendeklaration eine Vor- und Nachbedingung, welche angeben, dass wenn die Vorbedingung (vom Aufrufer) erfüllt wird, die Nachbedingung zugesichert werden kann. Zuvor gilt es allerdings für jeden Kontrakt zu zeigen, dass die Nachbedingung aus der Vorbedienung und der symbolischen Ausführung des Methodenrumpfs folgt.
+
+Kontrakte werden auch von VeriFast eingelesen um die Korrektheit von C-Funktionen nachzuweisen. Für die Vor- und Nachbedingung stehen die Annotationen \texttt{requires} und \texttt{ensures} zur Verfügung, deren Bedingung in Form einer \emph{Assertion} definiert wird, die sich wiederum aus Heap chunks und/oder booleschen Ausdrücken zusammensetzt. Diese können innerhalb einer Assertion mittels \emph{Separation Conjunction} $(\&{*}\&)$, aus der \emph{Separation Logic}, kombiniert werden. Allgemein beschreibt Separation Logic eine Erweiterung der \emph{Hoare Logic}, welche Schlussfolgerungen über geteilte, änderbare Datenstrukturen, wie z.B. der Heap in Java und C, erlaubt. Die Konjunktion $C_{1} \; \&{*}\& \; C_{2}$ beschreibt dabei, dass $C_{1}$ und $C_{2}$ auf disjunkten Speicherbereichen gelten und somit Änderungen keinen Einfluss bzw. Nebeneffekte auf andere Bereiche haben. \cite{Reynolds2002}
+
+Um zu zeigen, dass die Vorbedingung bei einem Methodenaufruf erfüllt wird, versucht VeriFast die in \texttt{requires} hinterlegte Assertion zu \emph{konsumieren} - d.h. die enthaltenen Chunks und logischen Ausdrücke werden vom symbolischen Heap bzw. aus der Liste der Assumptions entfernt. Ist dies nicht möglich, da bspw. ein zu konsumierender Chunk auf dem Heap nicht vorhanden ist, so schlägt die Verifikation fehl. Konnte hingegen die Vorbedingung gezeigt werden, so \emph{produziert} VeriFast neue Einträge für die Assertion in \texttt{ensures}, die im weiteren Verlauf der Verifikation zur Verfügung stehen. Dieser Vorgang hat den Vorteil, dass bei einem Aufruf nicht der komplette Methodenrumpf durchlaufen werden muss, sondern VeriFast lediglich die spezifizierten Assertions konsumiert/produziert. \cite{Jacobs2017}
+
+\subsubsection{Prädikate}
 
 \subsubsection{Schleifeninvarianten}
 
