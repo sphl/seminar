@@ -68,7 +68,7 @@ fixpoint int length<t>(list<t> xs) {
 
 \subsubsection{malloc\_block Einheiten}
 
-Charakteristisch für C ist die dynamische Speicherverwaltung mittels \texttt{malloc} und \texttt{free}. Dadurch kann eine festgelegte Anzahl an Bytes angefordert und falls erfolgreich vom Betriebssystem alloziert, über einen Zeigen auf den Heap-Speicher angesprochen werden. Da C über keine automatische Garbage Collection (GC) verfügt, steht der Programmierer in der Pflicht den Speicherbereich manuell mit Hilfe von \texttt{free} zu räumen, falls dieser nicht mehr benötigt wird.
+Charakteristisch für C ist die dynamische Speicherverwaltung mittels \texttt{malloc} und \texttt{free}. Dadurch kann eine festgelegte Anzahl an Bytes angefordert und falls erfolgreich vom Betriebssystem alloziert, über einen Zeigen auf den Heap-Speicher angesprochen werden. Da C über keine automatische \emph{Garbage Collection} (GC) verfügt, steht der Programmierer in der Pflicht den Speicherbereich manuell mit Hilfe von \texttt{free} zu räumen, falls dieser nicht mehr benötigt wird.
 
 Den Zustand des Heap-Speichers gilt es auch bei der Verifikation von Programmen zu berücksichtigen. Hierbei legt VeriFast sogenannte \emph{chunks} auf dem symbolischen Heap ab, wann immer eine Datenstruktur während der symbolischen Ausführung alloziert wird. Instanzen die über \texttt{malloc} erzeugt wurden, erhalten dabei zusätzlich einen \texttt{malloc\_block} chunk. Über diesen Mechanismus kann vor der Freigabe überprüft werden, ob die zu löschende Instanz über einen gültigen \texttt{malloc\_block} Eintrag verfügt. \cite{Jacobs2010,Jacobs2017}
 
@@ -96,7 +96,7 @@ struct queue {
 \noindent
 Die Funktion \texttt{create\_queue}\footnote{\texttt{requires}, \texttt{ensures} und \texttt{close} werden erst in den darauffolgenden Abschnitten erklärt und können in diesem Beispiel übersprungen werden.} alloziert Heap-Speicher für eine neue Queue und weist den Variablen \texttt{first} und \texttt{last} initial den gleichen Knoten zu. Abschließend wird der Zeiger auf die Queue an den Aufrufer zurückgegeben. 
 
-\begin{lstlisting}
+\begin{lstlisting}[label=lst:create_queue]
 struct queue *create_queue()
   //@ requires true;
   //@ ensures queue(result, nil);
@@ -148,6 +148,28 @@ Um zu zeigen, dass die Vorbedingung bei einem Methodenaufruf erfüllt wird, vers
 
 \subsubsection{Prädikate}
 
+Prädikate können dazu eingesetzt werden, Aussagen, die wiederkehrend in unterschiedlichen Methodenkontrakten Verwendung finden, zu kapseln. Über den \texttt{close}-Befehl werden diese durch ein passendes Prädikat gebündelt, wobei die vorherige Assertion durch das entsprechende Prädikat auf dem Heap ersetzt wird. Die entgegengesetzte Wirkung erzielt \texttt{open}, dass ein Prädikat in dessen Bestandteile (Aussagen) zerlegt. \cite{Jacobs2017}
+
+\begin{figure}[hbt!]
+	\centering
+	\begin{minipage}{.45\textwidth}
+		\centering
+		\input{Bilder/nodes.tikz}
+		\captionof{figure}{\texttt{nodes} Prädikat}
+		\label{fig:nodes}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.45\textwidth}
+		\centering
+		\input{Bilder/queue.tikz}
+		\captionof{figure}{\texttt{queue} Prädikat}
+		\label{fig:queue}
+	\end{minipage}
+\end{figure}
+
+\noindent
+\cref{fig:nodes} veranschaulicht die erste \texttt{close}-Anweisung in \texttt{create\_queue} aus Listing \ref{lst:create_queue}. In dieser Abstraktion wird ein Teil der generierten Chunks ($C_{3},\ldots,C_{6}$) durch das Prädikat \texttt{nodes} gekapselt, dass wiederum in \texttt{queue} enthalten ist (vgl. \cref{fig:queue}). Die konkrete Implementierung der beiden Prädikate sieht somit wie folgt aus.
+
 \noindent
 \begin{minipage}{.45\textwidth}
 \begin{lstlisting}
@@ -183,20 +205,9 @@ predicate queue(
 \end{minipage}
 
 \noindent
-\begin{figure}[hbt!]
-	\centering
-	\begin{minipage}{.45\textwidth}
-		\centering
-		\input{Bilder/nodes.tikz}
-		\captionof{figure}{\texttt{nodes} Prädikat}
-	\end{minipage}
-	\hfill
-	\begin{minipage}{.45\textwidth}
-		\centering
-		\input{Bilder/queue.tikz}
-		\captionof{figure}{\texttt{queue} Prädikat}
-	\end{minipage}
-\end{figure}
+Innerhalb der oberen Listings werde neue Variablen mittels \texttt{?var} (Fragezeichen) eingeführt. Der symbolische Wert wird dabei an den Variablennamen gebunden, um somit explizite Aussagen über Werte machen zu können. Anders verhält es sich mit \texttt{\_}, den VeriFast als namenlosen Platzhalter für beliebige Werte ansieht. \cite{Jacobs2017}
+
+\texttt{nodes} beschreibt in diesem Beispiel ein rekursiv definiertes Prädikat, dessen induktive Liste \texttt{vs} den Inhalt zwischen den Knoten \texttt{first} und \texttt{last} repräsentiert. Hierbei setzt sich \texttt{vs} aus dem aktuellen Wert und der Restliste \texttt{vs0}, die sich wiederum aus dem rekursiven Aufruf und dem Folgeknoten von \texttt{first} ergibt, zusammen. Das Abbruchkriterium der Rekursion ist dann erfüllt, wenn \texttt{first} gleicht \texttt{last} ist, dementsprechend keine Zwischenknoten existieren und somit die Restliste leer ist. Hier gilt es zu beachten, dass \texttt{last} zu jeden Zeitpunkt auf einem Hilfsknoten zeigt, welcher keine Nutzdaten speichert. Das zweite Prädikat \texttt{queue} enthält neben \texttt{nodes} weitere Chunks die eine gültige Queue repräsentieren. D.h. nach der erfolgreichen Ausführung von \texttt{create\_queue} befindet sich \texttt{queue}, zusammen mit den entsprechenden Parametern, auf dem symbolischen Heap-Speicher.
 
 \subsubsection{Schleifeninvarianten}
 
@@ -205,10 +216,10 @@ predicate queue(
 \subsection{Verifikation -- Queue}
 \label{subsec:queue}
 
-\subsection{Praxis Fallstudien}
+%\subsection{Praxis Fallstudien}
 
-\subsubsection{Embedded Linux Network Management Software}
+%\subsubsection{Embedded Linux Network Management Software}
 
-\subsubsection{Linux USB BP Keyboard Driver}
+%\subsubsection{Linux USB BP Keyboard Driver}
 
-\subsection{Fazit}
+%\subsection{Fazit}
