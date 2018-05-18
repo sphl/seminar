@@ -121,7 +121,7 @@ struct queue *create_queue()
 	\centering
 	\begin{tabular}{|l|l|}
 		\hline
-		\rowcolor[HTML]{EFEFEF}
+		\rowcolor{LightGrey1}
 		% ----------------------------------------------------------------------------------------------------
 		\textbf{Chunk}                   & \textbf{Beschreibung}                                     \\ \hline
 		% ----------------------------------------------------------------------------------------------------
@@ -147,6 +147,56 @@ Kontrakte werden auch von VeriFast eingelesen um die Korrektheit von C-Funktione
 Um zu zeigen, dass die Vorbedingung bei einem Methodenaufruf erfüllt wird, versucht VeriFast die in \texttt{requires} hinterlegte Assertion zu \emph{konsumieren} - d.h. die enthaltenen Chunks und logischen Ausdrücke werden vom symbolischen Heap bzw. aus der Liste der Assumptions entfernt. Ist dies nicht möglich, da bspw. ein zu konsumierender Chunk auf dem Heap nicht vorhanden ist, so schlägt die Verifikation fehl. Konnte hingegen die Vorbedingung gezeigt werden, so \emph{produziert} VeriFast neue Einträge für die Assertion in \texttt{ensures}, die im weiteren Verlauf der Verifikation zur Verfügung stehen. Dieser Vorgang hat den Vorteil, dass bei einem Aufruf nicht der komplette Methodenrumpf durchlaufen werden muss, sondern VeriFast lediglich die spezifizierten Assertions konsumiert/produziert. \cite{Jacobs2017}
 
 \subsubsection{Prädikate}
+
+\noindent
+\begin{minipage}{.45\textwidth}
+\begin{lstlisting}
+predicate nodes(
+    struct node *first,
+    struct node *last,
+    list<char> vs) =
+  first == last ?
+    vs == nil
+  :
+    first->next |-> ?next &*&
+    first->value |-> ?val &*&
+    malloc_block_node(first) &*&
+    nodes(next, last, ?vs0) &*&
+    vs == cons(val, vs0);
+\end{lstlisting}
+\end{minipage}
+\hfill
+\begin{minipage}{.45\textwidth}
+\begin{lstlisting}
+predicate queue(
+    struct queue *q,
+    list<char> vs) =
+  q->first |-> ?first &*&
+  q->last |-> ?last &*&
+  malloc_block_queue(q) &*&
+  nodes(first, last, vs) &*&
+  last->next |-> _ &*&
+  last->value |-> _ &*&
+  malloc_block_node(last);
+#\newline#
+\end{lstlisting}
+\end{minipage}
+
+\noindent
+\begin{figure}[hbt!]
+	\centering
+	\begin{minipage}{.45\textwidth}
+		\centering
+		\input{Bilder/nodes.tikz}
+		\captionof{figure}{\texttt{nodes} Prädikat}
+	\end{minipage}
+	\hfill
+	\begin{minipage}{.45\textwidth}
+		\centering
+		\input{Bilder/queue.tikz}
+		\captionof{figure}{\texttt{queue} Prädikat}
+	\end{minipage}
+\end{figure}
 
 \subsubsection{Schleifeninvarianten}
 

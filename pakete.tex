@@ -3,7 +3,22 @@
 \usepackage[utf8]{inputenc}
 \usepackage[ngerman]{babel}
 
+\usepackage{caption}
+
 \usepackage[table,xcdraw]{xcolor}
+\definecolor{LightGrey1}{HTML}{EFEFEF}
+\definecolor{LightGrey2}{HTML}{C0C0C0}
+\definecolor{LightGrey3}{HTML}{9B9B9B}
+\definecolor{DarkGrey1}{HTML}{656565}
+\definecolor{DarkGrey2}{HTML}{343434}
+%\definecolor{LightGreen}{HTML}{009901}
+%\definecolor{DarkGreen}{HTML}{036400}
+%\definecolor{LightBlue}{HTML}{3531FF}
+%\definecolor{DarkBlue}{HTML}{00009B}
+
+\usepackage{tikz}
+\usetikzlibrary{patterns}
+
 \usepackage{graphicx}
 \graphicspath{{Bilder/}}
 
@@ -13,7 +28,8 @@
 	language    = c,
 	columns     = fullflexible,
 	basicstyle  = \ttfamily,
-	xleftmargin = 10pt
+	xleftmargin = 10pt,
+	escapechar  = \#
 }
 \lstset{
 	moredelim    = **[s][\itshape]{/*}{*/},
