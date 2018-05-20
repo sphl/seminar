@@ -154,20 +154,17 @@ void queue_destroy(struct queue *q)
   //@ requires queue(q, _);
   //@ ensures true;
 {
-  int cnt = queue_count(q);
   //@ open queue(q, _);
   struct node *l = q->last;
   struct node *n = q->first;
-  while (cnt > 0)
-    //@ invariant nodes(n, l, ?vs) &*& cnt == length(vs);
+  while (n != l)
+    //@ invariant nodes(n, l, ?vs);
   {
     //@ open nodes(n, l, _);
     struct node *tmp = n->next;
     free(n);
     n = tmp;
-    cnt--;
   }
-  assert(cnt == 0);
   // Don't forget to destroy the last node
   //@ open nodes(n, l, _);
   free(l);

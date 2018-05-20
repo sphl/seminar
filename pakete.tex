@@ -3,24 +3,41 @@
 \usepackage[utf8]{inputenc}
 \usepackage[ngerman]{babel}
 
+\usepackage[
+    final,
+    activate = true,
+    tracking = true,
+    kerning  = true,
+    spacing  = true,
+    factor   = 1100,
+    stretch  = 10,
+    shrink   = 10
+]{microtype}
+
+\usepackage{url}
 \usepackage{caption}
 
-\usepackage[table,xcdraw]{xcolor}
+\usepackage[table]{xcolor}
+\definecolor{DarkGrey1}{HTML}{656565}
+\definecolor{DarkGrey2}{HTML}{343434}
 \definecolor{LightGrey1}{HTML}{EFEFEF}
 \definecolor{LightGrey2}{HTML}{C0C0C0}
 \definecolor{LightGrey3}{HTML}{9B9B9B}
-\definecolor{DarkGrey1}{HTML}{656565}
-\definecolor{DarkGrey2}{HTML}{343434}
-%\definecolor{LightGreen}{HTML}{009901}
-%\definecolor{DarkGreen}{HTML}{036400}
-%\definecolor{LightBlue}{HTML}{3531FF}
-%\definecolor{DarkBlue}{HTML}{00009B}
 
 \usepackage{tikz}
 \usetikzlibrary{patterns}
 
 \usepackage{graphicx}
 \graphicspath{{Bilder/}}
+
+\usepackage{fancyhdr}
+\fancypagestyle{plain}{
+	\fancyhf{}
+	\fancyfoot[C]{--~\thepage~--}
+	\renewcommand*{\headrulewidth}{0pt}
+	\renewcommand*{\footrulewidth}{0pt}
+}
+\pagestyle{plain}
 
 \usepackage{listings}
 % Die Formattierung der Listings wurde aus dem VeriFast Tutorial übernommen
@@ -29,7 +46,7 @@
 	columns     = fullflexible,
 	basicstyle  = \ttfamily,
 	xleftmargin = 10pt,
-	escapechar  = \#
+	escapechar  = \#,
 }
 \lstset{
 	moredelim    = **[s][\itshape]{/*}{*/},
@@ -37,15 +54,32 @@
 	morekeywords = {requires,ensures,true,false,predicate,lemma,fixpoint,predicate_ctor,leak,open,close,bool,invariant,inductive,assert,predicate_family,predicate_family_instance}
 }
 
-\usepackage[ngerman]{varioref}
-\usepackage{hyperref}
-\usepackage[ngerman]{cleveref}
-
 \usepackage[
-	backend   = biber,
-	hyperref  = true,
-	style     = alphabetic,
+	backend  = biber,
+	hyperref = true,
+	style    = alphabetic,
 ]{biblatex}
 \addbibresource{quellen.bib}
 
+\usepackage[ngerman]{varioref}
 \usepackage{hyperref}
+\usepackage[ngerman,noabbrev]{cleveref}
+
+\usepackage{hyperref}
+\hypersetup{
+    pdftitle    = {Formale Verifikation von C Programmen},
+    pdfsubject  = {Seminararbeit im Bereich der Softwaretechnik an der Universitaet Augsburg},
+    pdfauthor   = {Stephan Lipp},
+    pdfkeywords = {{C} {Verifikation} {VeriFast}},
+}
+\hypersetup{
+	bookmarks   = true,
+	linktoc     = page,
+	colorlinks  = true,
+	linkcolor   = black,
+	anchorcolor = black,
+	citecolor   = cyan,
+	filecolor   = black,
+	menucolor   = black,
+	urlcolor    = blue,
+}

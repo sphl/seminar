@@ -1,14 +1,26 @@
-\documentclass[11pt]{article}
+\documentclass[
+	11pt,
+%	a4paper,
+%	BCOR = 10mm,
+%	DIV = 10,
+	oneside,
+	openany,
+	onecolumn,
+	final,
+]{article}
+
+% Vermeide 'Schusterjungen' und 'Hurrenkinder'
+\clubpenalty         = 10000
+\widowpenalty        = 10000
+\displaywidowpenalty = 10000
 
 \input{pakete}
 
 \begin{document}
 
 \include{titelseite}
-
 \include{zitat}
 
-\clearpage
 \setcounter{page}{1}
 
 \tableofcontents

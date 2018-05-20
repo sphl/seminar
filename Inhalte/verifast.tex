@@ -70,7 +70,7 @@ fixpoint int length<t>(list<t> xs) {
 
 Charakteristisch für C ist die dynamische Speicherverwaltung mittels \texttt{malloc} und \texttt{free}. Dadurch kann eine festgelegte Anzahl an Bytes angefordert und falls erfolgreich vom Betriebssystem alloziert, über einen Zeigen auf den Heap-Speicher angesprochen werden. Da C über keine automatische \emph{Garbage Collection} (GC) verfügt, steht der Programmierer in der Pflicht den Speicherbereich manuell mit Hilfe von \texttt{free} zu räumen, falls dieser nicht mehr benötigt wird.
 
-Den Zustand des Heap-Speichers gilt es auch bei der Verifikation von Programmen zu berücksichtigen. Hierbei legt VeriFast sogenannte \emph{chunks} auf dem symbolischen Heap ab, wann immer eine Datenstruktur während der symbolischen Ausführung alloziert wird. Instanzen die über \texttt{malloc} erzeugt wurden, erhalten dabei zusätzlich einen \texttt{malloc\_block} chunk. Über diesen Mechanismus kann vor der Freigabe überprüft werden, ob die zu löschende Instanz über einen gültigen \texttt{malloc\_block} Eintrag verfügt. \cite{Jacobs2010,Jacobs2017}
+Den Zustand des Heap-Speichers gilt es auch bei der Verifikation von Programmen zu berücksichtigen. Hierbei legt VeriFast sogenannte \emph{chunks} auf dem symbolischen Heap ab, wann immer eine Datenstruktur während der symbolischen Ausführung alloziert wird. Instanzen die über \texttt{malloc} erzeugt wurden, erhalten dabei zusätzlich einen \texttt{malloc\_block} chunk. Über diesen Mechanismus kann vor der Freigabe überprüft werden, ob die zu löschende Instanz über einen gültigen \texttt{malloc\_block} Eintrag verfügt. \cite{Jacobs2008,Jacobs2010}
 
 Das nachfolgende Listing zeigt die beiden C-Strukturen \texttt{node} und \texttt{queue}. Erstere stellt einen Knoten in einer einfach verketteten Liste dar, welche neben einer Character Variablen einen Zeiger auf das nächste Listenelement enthält. \texttt{queue} verfügt über zwei Zeiger die jeweils auf das erste bzw. letzte Element einer Liste/Warteschlange zeigen.
 
@@ -148,7 +148,7 @@ Um zu zeigen, dass die Vorbedingung bei einem Methodenaufruf erfüllt wird, vers
 
 \subsubsection{Prädikate}
 
-Prädikate können dazu eingesetzt werden, Aussagen, die wiederkehrend in unterschiedlichen Methodenkontrakten Verwendung finden, zu kapseln. Über den \texttt{close}-Befehl werden diese durch ein passendes Prädikat gebündelt, wobei die vorherige Assertion durch das entsprechende Prädikat auf dem Heap ersetzt wird. Die entgegengesetzte Wirkung erzielt \texttt{open}, dass ein Prädikat in dessen Bestandteile (Aussagen) zerlegt. \cite{Jacobs2017}
+Prädikate können dazu eingesetzt werden, Aussagen, die wiederkehrend in unterschiedlichen Methodenkontrakten Verwendung finden, zu kapseln. Über den \texttt{close}-Befehl werden diese durch ein passendes Prädikat gebündelt, wobei die vorherige Assertion durch das entsprechende Prädikat auf dem Heap ersetzt wird. Die entgegengesetzte Wirkung erzielt \texttt{open}, dass ein Prädikat in dessen Bestandteile (Aussagen) zerlegt. \cite{Jacobs2008,Jacobs2017}
 
 \begin{figure}[hbt!]
 	\centering
@@ -211,6 +211,10 @@ Innerhalb der oberen Listings werde neue Variablen mittels \texttt{?var} (Fragez
 
 \subsubsection{Schleifeninvarianten}
 
+Eine Schleifeninvariante (INV) ist ein Spezialfall der Invariante. Diese beschreibt eine logische Aussage, die zu Beginn und Ende einer Schleife, sowie nach jedem Schleifendurchgang, gilt bzw. erhalten bleiben muss. INV liefert somit eine \emph{grobe} Aussage über die Semantik des Schleifenrumpfs, die zudem unabhängig von der Anzahl der Schleifendurchgänge gilt.
+
+VeriFast zeigt für Schleifen ausschließlich \emph{partielle Korrektheit}\footnote{Anders als bei \emph{totaler Korrektheit} wird hierbei der Terminierungsnachweis vernachlässigt.}, dessen konkreter Ablauf wie folgt aussieht: \cite{Jacobs2017}
+
 \begin{itemize}
 	\item Zeige, dass INV vor dem ersten Durchlauf gilt (INV konsumieren).
 	\item Zeige, dass INV nach jedem Durchlauf erhalten bleibt:
@@ -228,6 +232,31 @@ Innerhalb der oberen Listings werde neue Variablen mittels \texttt{?var} (Fragez
 		\end{itemize}
 	\end{enumerate}
 \end{itemize}
+
+\noindent
+Ein Anwendungsfall für eine solche Schleifeninvariante ist in der Funktion \texttt{queue\_destroy} zu finden. Darin wird über all die Knoten in der Queue iteriert, welche die tatsächlichen Nutzdaten speichern, um diese nacheinander freizugeben. D.h. der letzte Hilfsknoten (\texttt{last}) muss außerhalb der Schleife gelöscht werden. Über die Schleifeninvariante gilt es zu zeigen, dass vor der Schleife und nach jedem Schleifendurchlauf das \texttt{nodes}-Prädikat, zusammen mit der passenden Listen-Abstraktion, konsumiert werden kann. 
+
+\begin{lstlisting}
+void queue_destroy(struct queue *q)
+  //@ requires queue(q, _);
+  //@ ensures true;
+{
+  //@ open queue(q, _);
+  struct node *l = q->last;
+  struct node *n = q->first;
+  while (n != l)
+    //@ invariant nodes(n, l, ?vs);
+  {
+    //@ open nodes(n, l, _);
+    struct node *tmp = n->next;
+    free(n);
+    n = tmp;
+  }
+  //@ open nodes(n, l, _);
+  free(l);
+  free(q);
+}
+\end{lstlisting}
 
 \subsubsection{Lemma Funktionen}
 
