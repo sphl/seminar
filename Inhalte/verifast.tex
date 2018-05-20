@@ -211,6 +211,24 @@ Innerhalb der oberen Listings werde neue Variablen mittels \texttt{?var} (Fragez
 
 \subsubsection{Schleifeninvarianten}
 
+\begin{itemize}
+	\item Zeige, dass INV vor dem ersten Durchlauf gilt (INV konsumieren).
+	\item Zeige, dass INV nach jedem Durchlauf erhalten bleibt:
+	\begin{enumerate}
+		\item Symbolischen Heap temporär räumen und für jeden lokale Variable innerhalb des Schleifenrumpfs ein \emph{frisches} Symbol vergeben.
+		\item INV erneut auf den symbolischen Heap legen (INV produzieren).
+		\item Fallunterscheidung bzgl. der Schleifenbedingung $\epsilon$:
+		\begin{itemize}
+			\item $[\![\epsilon]\!] = true:$
+			\begin{enumerate}
+				\item Schleifenrumpf verifizieren und anschließend INV konsumieren.
+				\item Überprüfung weiterer \emph{Leaks} und Abschluss des Pfades.
+			\end{enumerate}
+			\item Sonst, Heap zurücksetzen und mit der Verifikation des Folgeprogramms fortfahren.
+		\end{itemize}
+	\end{enumerate}
+\end{itemize}
+
 \subsubsection{Lemma Funktionen}
 
 \subsection{Verifikation -- Queue}
