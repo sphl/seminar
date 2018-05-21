@@ -74,8 +74,9 @@ Den Zustand des Heap-Speichers gilt es auch bei der Verifikation von Programmen 
 
 Das nachfolgende Listing zeigt die beiden C-Strukturen \texttt{node} und \texttt{queue}. Erstere stellt einen Knoten in einer einfach verketteten Liste dar, welche neben einer Character Variablen einen Zeiger auf das nächste Listenelement enthält. \texttt{queue} verfügt über zwei Zeiger die jeweils auf das erste bzw. letzte Element einer Liste/Warteschlange zeigen.
 
-\noindent
-\begin{minipage}{.45\textwidth}
+\vspace{-10pt}
+{\noindent
+\begin{minipage}[t]{.45\textwidth}
 \begin{lstlisting}
 struct node {
   struct node *next;
@@ -84,7 +85,7 @@ struct node {
 \end{lstlisting}
 \end{minipage}
 \hfill
-\begin{minipage}{.45\textwidth}
+\begin{minipage}[t]{.45\textwidth}
 \begin{lstlisting}
 struct queue {
   struct node *first;
@@ -92,6 +93,7 @@ struct queue {
 };
 \end{lstlisting}
 \end{minipage}
+}
 
 \noindent
 Die Funktion \texttt{create\_queue}\footnote{\texttt{requires}, \texttt{ensures} und \texttt{close} werden erst in den darauffolgenden Abschnitten erklärt und können in diesem Beispiel übersprungen werden.} alloziert Heap-Speicher für eine neue Queue und weist den Variablen \texttt{first} und \texttt{last} initial den gleichen Knoten zu. Abschließend wird der Zeiger auf die Queue an den Aufrufer zurückgegeben. 
@@ -118,21 +120,21 @@ struct queue *create_queue()
 
 {\setlength\extrarowheight{5pt} % Vergroeßert den Zeilenabstand
 \begin{table}[hbt!]
-	\centering
-	\begin{tabular}{|l|l|}
+%	\centering
+	\begin{tabularx}{\textwidth}{|p{4.5cm}|X|}
 		\hline
 		\rowcolor{LightGrey1}
-		% ----------------------------------------------------------------------------------------------------
+		%-----------------------------------------------------------------------------------------------------
 		\textbf{Chunk}                   & \textbf{Beschreibung}                                     \\ \hline
-		% ----------------------------------------------------------------------------------------------------
+		%-----------------------------------------------------------------------------------------------------
 		\texttt{malloc\_block\_node(n)}  & Dynamisch allozierte Instanz \texttt{n}                   \\ \hline
 		\texttt{malloc\_block\_queue(q)} & Dynamisch allozierte Instanz \texttt{q}                   \\ \hline
 		\texttt{n->next |-> value1}      & Feld \texttt{next} hat symbolischen Wert \texttt{value1}  \\ \hline
 		\texttt{n->value |-> value2}     & Feld \texttt{value} hat symbolischen Wert \texttt{value2} \\ \hline
 		\texttt{q->first |-> n}          & Feld \texttt{first} zeigt auf Instanz \texttt{n}          \\ \hline
 		\texttt{q->last |-> n}           & Feld \texttt{last} zeigt auf Instanz \texttt{n}           \\ \hline
-		% ----------------------------------------------------------------------------------------------------
-	\end{tabular}
+		%-----------------------------------------------------------------------------------------------------
+	\end{tabularx}
 	\caption{Heap chunks}
 	\label{tab:heap-chunks}
 \end{table}
@@ -151,16 +153,16 @@ Um zu zeigen, dass die Vorbedingung bei einem Methodenaufruf erfüllt wird, vers
 Prädikate können dazu eingesetzt werden, Aussagen, die wiederkehrend in unterschiedlichen Methodenkontrakten Verwendung finden, zu kapseln. Über den \texttt{close}-Befehl werden diese durch ein passendes Prädikat gebündelt, wobei die vorherige Assertion durch das entsprechende Prädikat auf dem Heap ersetzt wird. Die entgegengesetzte Wirkung erzielt \texttt{open}, dass ein Prädikat in dessen Bestandteile (Aussagen) zerlegt. \cite{Jacobs2008,Jacobs2017}
 
 \begin{figure}[hbt!]
-	\centering
+%	\centering
 	\begin{minipage}{.45\textwidth}
-		\centering
+%		\centering
 		\input{Bilder/nodes.tikz}
 		\captionof{figure}{\texttt{nodes} Prädikat}
 		\label{fig:nodes}
 	\end{minipage}
 	\hfill
 	\begin{minipage}{.45\textwidth}
-		\centering
+%		\centering
 		\input{Bilder/queue.tikz}
 		\captionof{figure}{\texttt{queue} Prädikat}
 		\label{fig:queue}
@@ -170,8 +172,9 @@ Prädikate können dazu eingesetzt werden, Aussagen, die wiederkehrend in unters
 \noindent
 \cref{fig:nodes} veranschaulicht die erste \texttt{close}-Anweisung in \texttt{create\_queue} aus Listing \ref{lst:create_queue}. In dieser Abstraktion wird ein Teil der generierten Chunks ($C_{3},\ldots,C_{6}$) durch das Prädikat \texttt{nodes} gekapselt, dass wiederum in \texttt{queue} enthalten ist (vgl. \cref{fig:queue}). Die konkrete Implementierung der beiden Prädikate sieht somit wie folgt aus.
 
-\noindent
-\begin{minipage}{.45\textwidth}
+\vspace{-10pt}
+{\noindent
+\begin{minipage}[t]{.45\textwidth}
 \begin{lstlisting}
 predicate nodes(
     struct node *first,
@@ -188,7 +191,7 @@ predicate nodes(
 \end{lstlisting}
 \end{minipage}
 \hfill
-\begin{minipage}{.45\textwidth}
+\begin{minipage}[t]{.45\textwidth}
 \begin{lstlisting}
 predicate queue(
     struct queue *q,
@@ -200,9 +203,9 @@ predicate queue(
   last->next |-> _ &*&
   last->value |-> _ &*&
   malloc_block_node(last);
-#\newline#
 \end{lstlisting}
 \end{minipage}
+}
 
 \noindent
 Innerhalb der oberen Listings werde neue Variablen mittels \texttt{?var} (Fragezeichen) eingeführt. Der symbolische Wert wird dabei an den Variablennamen gebunden, um somit explizite Aussagen über Werte machen zu können. Anders verhält es sich mit \texttt{\_}, den VeriFast als namenlosen Platzhalter für beliebige Werte ansieht. \cite{Jacobs2017}
@@ -260,8 +263,122 @@ void queue_destroy(struct queue *q)
 
 \subsubsection{Lemma Funktionen}
 
+\begin{lstlisting}
+lemma void nodes_add(struct node *first)
+  requires nodes(first, ?last, ?vs) &*&
+    last->next |-> ?next &*&
+    last->value |-> ?val &*&
+    malloc_block_node(last) &*&
+    next->next |-> ?nextNext;
+  ensures nodes(first, next, ?vs0) &*&
+    vs0 == append(vs, cons(val, nil)) &*&
+    next->next |-> nextNext;
+{
+  open nodes(first, last, vs);
+  if (first == last) {
+      close nodes(next, next, nil);
+  } else {
+      nodes_add(first->next);
+  }
+  close nodes(first, next, _);
+}
+\end{lstlisting}
+
 \subsection{Verifikation -- Queue}
 \label{subsec:queue}
+
+\vspace{-10pt}
+{\noindent
+\begin{minipage}[t]{.45\textwidth}
+\begin{lstlisting}
+void queue_enqueue(
+    struct queue *q,
+    char c)
+  //@ requires queue(q, ?vs);
+  /*@ ensures queue(q, append(vs,
+        cons(c, nil))); @*/
+{
+  //@ open queue(q, vs);
+  struct node *n =
+    malloc(sizeof(struct node));
+  if (n == 0) {
+    abort();
+  }
+  q->last->next = n;
+  q->last->value = c;
+  q->last = n;
+  //@ nodes_add(q->first);
+  //@ close queue(q, _);
+}
+\end{lstlisting}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{.45\textwidth}
+\begin{lstlisting}
+char queue_dequeue(
+    struct queue *q)
+  /*@ requires queue(q, ?vs) &*&
+        vs != nil; @*/
+  /*@ ensures queue(q, ?vs0) &*&
+        vs == cons(result, vs0); @*/
+{
+  //@ open queue(q, _);
+  struct node *n = q->first;
+  //@ open nodes(n, _, _);
+  char result = n->value;
+  q->first = n->next;
+  free(n);
+  //@ close queue(q, _);
+  return result;
+}
+\end{lstlisting}
+\end{minipage}
+}
+
+\vspace{-10pt}
+{\noindent
+\begin{minipage}[t]{.45\textwidth}
+\begin{lstlisting}
+bool nodes_contains(
+    struct node *f,
+    struct node *l,
+    char c)
+  //@ requires nodes(f, l, ?vs);
+  /*@ ensures nodes(f, l, vs) &*&
+        result == mem(c, vs); @*/
+{
+  //@ open nodes(f, l, vs);
+  bool res = false;
+  if (f != l) {
+    bool cmp = (f->value == c);
+    bool tmp = nodes_contains(
+      f->next, l, c);
+    res = (cmp || tmp);
+  }
+  //@ close nodes(f, l, vs);
+  return res;
+}
+\end{lstlisting}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{.45\textwidth}
+\begin{lstlisting}
+bool queue_contains(
+    struct queue *q,
+    char c)
+  //@ requires queue(q, ?vs);
+  /*@ ensures queue(q, vs) &*&
+        result == mem(c, vs); @*/
+{
+  //@ open queue(q, vs);
+  bool res = nodes_contains(
+    q->first, q->last, c);
+  //@ close queue(q, vs);
+  return res;
+}
+\end{lstlisting}
+\end{minipage}
+}
 
 %\subsection{Praxis Fallstudien}
 
