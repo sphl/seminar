@@ -157,14 +157,14 @@ Prädikate können dazu eingesetzt werden, Aussagen, die wiederkehrend in unters
 	\begin{minipage}{.45\textwidth}
 %		\centering
 		\input{Bilder/nodes.tikz}
-		\captionof{figure}{\texttt{nodes} Prädikat}
+		\captionof{figure}{Prädikat \texttt{nodes}}
 		\label{fig:nodes}
 	\end{minipage}
 	\hfill
 	\begin{minipage}{.45\textwidth}
 %		\centering
 		\input{Bilder/queue.tikz}
-		\captionof{figure}{\texttt{queue} Prädikat}
+		\captionof{figure}{Prädikat \texttt{queue}}
 		\label{fig:queue}
 	\end{minipage}
 \end{figure}
@@ -263,6 +263,10 @@ void queue_destroy(struct queue *q)
 
 \subsubsection{Lemma Funktionen}
 
+Lemma Funktionen haben eine starke Ähnlichkeit zu normalen C-Funktion. Der Unterschied besteht darin, dass weder Variablenzuweisungen noch Methodenaufrufe enthalten sein dürfen. Des weiteren muss sichergestellt werden, dass rekursive Lemma Funktion in allen Pfaden terminieren\footnote{Eine genaue Auflistung der zulässigen Rekursionsarten ist in \cite[S. 22]{Jacobs2017} zu finden.}. Ziel einer solchen Funktion ist die Transformation einer Darstellung von Heap-Chunks in eine andere, wobei die zugrunde liegenden Chunks unverändert bleiben. \cite{Jacobs2010}
+
+In Hinblick auf das Beispiel in \cref{subsec:queue} wird an dieser Stelle die Lemma Funktion \texttt{nodes\_add} vorgestellt.
+
 \begin{lstlisting}
 lemma void nodes_add(struct node *first)
   requires nodes(first, ?last, ?vs) &*&
@@ -283,6 +287,9 @@ lemma void nodes_add(struct node *first)
   close nodes(first, next, _);
 }
 \end{lstlisting}
+
+\noindent
+Hier fordert \texttt{requires} eine gültige \texttt{nodes}-Abstraktion, in der \texttt{last} einen Folgeknoten besitzt. Dies bedeutet, die Queue wurde um einen Knoten erweitert, welcher noch nicht in der Abstraktion enthalten ist. Hierfür wird \texttt{nodes} innerhalb der Implementierung rekursiv aufgespalten, um anschließend das Prädikat sukzessive mit dem neuen Element erneut zusammenzubauen.
 
 \subsection{Verifikation -- Queue}
 \label{subsec:queue}

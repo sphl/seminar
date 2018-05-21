@@ -1,0 +1,22 @@
+\newcommand{\chainlabel}[2]{\path [<-, draw, shorten >=17pt] (#1) |- node [at end] {#2} ++(-1,1);}
+
+\begin{tikzpicture}[list/.style={rectangle split, rectangle split parts=2, draw, rectangle split horizontal}, >=stealth, start chain]
+	\node[list,on chain] (A) {$c_{0}$};
+	\node[list,on chain] (B) {$c_{1},\ldots,c_{n-1}$};
+	\node[list,on chain] (C) {$c_{n}$};
+	\node[list,on chain] (D) {};
+	\node[on chain,draw,inner sep=6pt] (E) {};
+	\draw (E.north east) -- (E.south west);
+	\draw (E.north west) -- (E.south east);
+	\draw[*->] let \p1 = (A.two), \p2 = (A.center) in (\x1,\y2) -- (B);
+	\draw[*->] let \p1 = (B.two), \p2 = (B.center) in (\x1,\y2) -- (C);
+	\draw[*->] let \p1 = (C.two), \p2 = (C.center) in (\x1,\y2) -- (D);
+	\draw[*->] let \p1 = (D.two), \p2 = (D.center) in (\x1,\y2) -- (E);
+	\chainlabel{chain-1.one north}{$first$};
+	\chainlabel{chain-3.one north}{$last_{old}$};
+	\chainlabel{chain-4.one north}{$last_{new}$};
+	\draw[decoration={brace,mirror,raise=20pt},decorate]
+	(A.west) -- node[below=25pt] {$nodes(first, last_{old}, vs)$} (B.east);
+	\draw[decoration={brace,mirror,raise=50pt},decorate]
+	(A.west) -- node[below=55pt] {$nodes(first, last_{new}, vs ::: cons(c_{n},nil))$} (C.east);
+\end{tikzpicture}
