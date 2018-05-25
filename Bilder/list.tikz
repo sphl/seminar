@@ -16,7 +16,7 @@
 	\chainlabel{chain-3.one north}{$last_{old}$};
 	\chainlabel{chain-4.one north}{$last_{new}$};
 	\draw[decoration={brace,mirror,raise=20pt},decorate]
-	(A.west) -- node[below=25pt] {$nodes(first, last_{old}, vs)$} (B.east);
+	(A.west) -- node[below=25pt] {$nodes(first, \; last_{old}, \; vs)$} (B.east);
 	\draw[decoration={brace,mirror,raise=50pt},decorate]
-	(A.west) -- node[below=55pt] {$nodes(first, last_{new}, vs ::: cons(c_{n},nil))$} (C.east);
+	(A.west) -- node[below=55pt] {$nodes(first, \; last_{new}, \; append(vs, \; cons(c_{n}, \; nil)))$} (C.east);
 \end{tikzpicture}

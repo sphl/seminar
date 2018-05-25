@@ -17,7 +17,7 @@ Im Rahmen dieser Seminararbeit werden wir uns hauptsächlich mit dem Verifikatio
 In diesem Abschnitt werden einige (Sprach-)Konzepte vorgestellt die VeriFast für die Programmverifikation bereitstellt. Dabei werden vorzugsweise die Konzepte behandelt, welche für das Verständnis des Beispiels in \cref{subsec:queue} relevant sind. Weiterführende Konzepte und Beispiele können in \cite{Jacobs2017} nachgelesen werden.
 
 \subsubsection{Induktive Datentypen}
-\label{subsec:adt}
+\label{subsubsec:adt}
 
 Ein wichtiges Hilfsmittel um die Korrektheit von Programme nachzuweisen, besteht in der Spezifikation von abstrakten Datentypen (ADT). Diese ermöglichen es, Eigenschaften und Operationen eines Datentyps auf einem höheren Abstraktionsniveau, d.h. unabhängig der konkreten Implementierung auf einem Computer, zu betrachten. Daraus resultierend können ADTs in der Programmverifikation als Repräsentanten für die Inhalte konkrete Datenstrukturen, wie beispielsweise Array oder einfach/doppelt verkettete Listen, eingesetzt werden. \cite[S. 265]{Saake2014}
 
@@ -34,7 +34,7 @@ In diesem Beispiel wurde eine generische Liste mit den Konstruktoren \texttt{nil
 
 Neben den induktiven ADTs unterstützt VeriFast die Spezifikation von Fix\-punkt-Funktionen, wodurch spezifische Operation auf induktive Datentypen ausgeführt werden können. Diese werden mit \texttt{fixpoint} eingeleitet und erhalten über die Parameterliste einen oder mehrere ADTs. Im Funktionsrumpf kann entweder direkt eine \texttt{return}-Anweisung, welche die berechnete Eigenschaft an den Aufrufer zurückgibt, oder eine \texttt{switch}-Anweisung stehen. Letztere führt eine Fallunterscheidung bezüglich aller Konstruktoren von genau einem induktiven Argument (Fixpunkt) aus. Zudem prüft VeriFast jede Funktion auf Terminierung - d.h. im Falle eines rekursiven Aufrufs muss der neue Fixpunkt ein Teilterm des alten Konstruktorterms sein. \cite{Jacobs2010}
 
-Ausgehend von der induktiven Liste in \cref{subsec:adt}, definieren wir die beiden Funktionen \texttt{head} und \texttt{tail}, welche das Kopfelement bzw. die Restliste des Fixpunkts \texttt{xs} zurückliefern.
+Ausgehend von der induktiven Liste in \cref{subsubsec:adt}, definieren wir die beiden Funktionen \texttt{head} und \texttt{tail}, welche das Kopfelement bzw. die Restliste des Fixpunkts \texttt{xs} zurückliefern.
 
 \begin{lstlisting}
 fixpoint t head<t>(list<t> xs) {
@@ -67,6 +67,7 @@ fixpoint int length<t>(list<t> xs) {
 \end{lstlisting}
 
 \subsubsection{malloc\_block Einheiten}
+\label{subsubsuc:malloc}
 
 Charakteristisch für C ist die dynamische Speicherverwaltung mittels \texttt{malloc} und \texttt{free}. Dadurch kann eine festgelegte Anzahl an Bytes angefordert und falls erfolgreich vom Betriebssystem alloziert, über einen Zeigen auf den Heap-Speicher angesprochen werden. Da C über keine automatische \emph{Garbage Collection} (GC) verfügt, steht der Programmierer in der Pflicht den Speicherbereich manuell mit Hilfe von \texttt{free} zu räumen, falls dieser nicht mehr benötigt wird.
 
@@ -98,7 +99,7 @@ struct queue {
 \noindent
 Die Funktion \texttt{create\_queue}\footnote{\texttt{requires}, \texttt{ensures} und \texttt{close} werden erst in den darauffolgenden Abschnitten erklärt und können in diesem Beispiel übersprungen werden.} alloziert Heap-Speicher für eine neue Queue und weist den Variablen \texttt{first} und \texttt{last} initial den gleichen Knoten zu. Abschließend wird der Zeiger auf die Queue an den Aufrufer zurückgegeben. 
 
-\begin{lstlisting}[label=lst:create_queue]
+\begin{lstlisting}
 struct queue *create_queue()
   //@ requires true;
   //@ ensures queue(result, nil);
@@ -170,7 +171,7 @@ Prädikate können dazu eingesetzt werden, Aussagen, die wiederkehrend in unters
 \end{figure}
 
 \noindent
-\cref{fig:nodes} veranschaulicht die erste \texttt{close}-Anweisung in \texttt{create\_queue} aus Listing \ref{lst:create_queue}. In dieser Abstraktion wird ein Teil der generierten Chunks ($C_{3},\ldots,C_{6}$) durch das Prädikat \texttt{nodes} gekapselt, dass wiederum in \texttt{queue} enthalten ist (vgl. \cref{fig:queue}). Die konkrete Implementierung der beiden Prädikate sieht somit wie folgt aus.
+\cref{fig:nodes} veranschaulicht die erste \texttt{close}-Anweisung in \texttt{create\_queue} aus \cref{subsubsuc:malloc}. In dieser Abstraktion wird ein Teil der generierten Chunks ($C_{3},\ldots,C_{6}$) durch das Prädikat \texttt{nodes} gekapselt, dass wiederum in \texttt{queue} enthalten ist (vgl. \cref{fig:queue}). Die konkrete Implementierung der beiden Prädikate sieht somit wie folgt aus.
 
 \vspace{-10pt}
 {\noindent
@@ -262,6 +263,7 @@ void queue_destroy(struct queue *q)
 \end{lstlisting}
 
 \subsubsection{Lemma Funktionen}
+\label{subsubsec:lemma}
 
 Lemma Funktionen haben eine starke Ähnlichkeit zu normalen C-Funktion. Der Unterschied besteht darin, dass weder Variablenzuweisungen noch Methodenaufrufe enthalten sein dürfen. Des weiteren muss sichergestellt werden, dass rekursive Lemma Funktion in allen Pfaden terminieren\footnote{Eine genaue Auflistung der zulässigen Rekursionsarten ist in \cite[S. 22]{Jacobs2017} zu finden.}. Ziel einer solchen Funktion ist die Transformation einer Darstellung von Heap-Chunks in eine andere, wobei die zugrunde liegenden Chunks unverändert bleiben. \cite{Jacobs2010}
 
@@ -291,8 +293,24 @@ lemma void nodes_add(struct node *first)
 \noindent
 Hier fordert \texttt{requires} eine gültige \texttt{nodes}-Abstraktion, in der \texttt{last} einen Folgeknoten besitzt. Dies bedeutet, die Queue wurde um einen Knoten erweitert, welcher noch nicht in der Abstraktion enthalten ist. Hierfür wird \texttt{nodes} innerhalb der Implementierung rekursiv aufgespalten, um anschließend das Prädikat sukzessive mit dem neuen Element erneut zusammenzubauen.
 
-\subsection{Verifikation -- Queue}
+\subsection{Verifikation einer Queue}
 \label{subsec:queue}
+
+Das abschließende Beispiel beschreibt die Funktionen \texttt{queue\_enqueue} und \texttt{queue\_dequeue}, mit deren Hilfe ein neues Element am Ende der Warteschlange eingereiht bzw. das erste und somit älteste Element herausgenommen werden kann. Darüber hinaus wird die Schnittstellenfunktion \texttt{queue\_contains} vorgestellt, welche prüft, ob ein gesuchtes Element innerhalb der Queue enthalten ist.
+
+\cref{fig:list} veranschaulicht den Zustand der Queue vor und nach der Ausführung von \texttt{queue\_enqueue}. Darin wird das Element $c_{n}$ eingefügt und anschließend \texttt{last} auf den neuen Hilfsknoten ($last_{new}$) gesetzt.
+
+\begin{figure}[!hbt]
+	\centering
+	\input{Bilder/list.tikz}
+	\caption{Ablauf von \texttt{queue\_enqueue}}
+	\label{fig:list}
+\end{figure}
+
+\noindent
+Innerhalb von \texttt{queue\_enqueue} kann nun die Lemma Funktion \texttt{nodes\_add} aus \cref{subsubsec:lemma} eingesetzt werden, um \texttt{nodes} bzgl. der \emph{gewachsenen} Queue zu aktualisieren.
+
+Die Schnittstellenfunktion \texttt{queue\_dequeue} benötigt hingegen keine zusätzliche Lemma Funktion, da \texttt{nodes(first, last, cons(val, vs))} genau einmal aufgespalten werden muss, um an das geschachtelte Folgeprädikat \texttt{nodes(first->next, last, vs)}\footnote{Abstraktion für den Inhalt der Queue nach dem ersten Element.} zu gelangen, welches im Anschluss wiederum an \texttt{queue} gebunden wird.
 
 \vspace{-10pt}
 {\noindent
@@ -341,6 +359,9 @@ char queue_dequeue(
 \end{lstlisting}
 \end{minipage}
 }
+
+\noindent
+Für die Überprüfung, ob ein Element in der Queue enthalten ist, wird die Funktion \texttt{queue\_contains} bereitgestellt. Die eigentliche Implementierung wurde jedoch nach \texttt{nodes\_contains} ausgelagert, um ausgehend vom Startknoten, alle weiteren Knoten rekursiv überprüfen zu können. Dabei wird der Inhalt des Startknotens mit dem gesuchten Element verglichen, dass Ergebnis in einer Variablen zwischengespeichert und anschließend die Funktion erneut mit dem Nachfolger des Startknotens rekursiv aufgerufen. Das Abbruchkriterium ist dann erfüllt, wenn Start- und Endknoten derselbe sind und somit die komplette Queue durchlaufen wurde. Abschließend werde die rekursiv berechneten Teilergebnisse über ein logisches OR miteinander verknüpft, dessen boolescher Ausdruck in der letzten \texttt{return}-Anweisung genau dann zu \emph{wahr} auswertet, wenn der Inhalt von mindestens einem Teilknoten dem des gesuchten Elements entspricht.
 
 \vspace{-10pt}
 {\noindent
