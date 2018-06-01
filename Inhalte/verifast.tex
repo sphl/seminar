@@ -220,8 +220,8 @@ Eine Schleifeninvariante (INV) ist ein Spezialfall der Invariante. Diese beschre
 VeriFast zeigt für Schleifen ausschließlich \emph{partielle Korrektheit}\footnote{Anders als bei \emph{totaler Korrektheit} wird hierbei der Terminierungsnachweis vernachlässigt.}, dessen konkreter Ablauf wie folgt aussieht: \cite{Jacobs2017}
 
 \begin{itemize}
-	\item Zeige, dass INV vor dem ersten Durchlauf gilt (INV konsumieren).
-	\item Zeige, dass INV nach jedem Durchlauf erhalten bleibt:
+	\item Zeige das INV vor dem ersten Durchlauf gilt (INV konsumieren).
+	\item Zeige das INV nach jedem Durchlauf erhalten bleibt:
 	\begin{enumerate}
 		\item Symbolischen Heap temporär räumen und für jeden lokale Variable innerhalb des Schleifenrumpfs ein \emph{frisches} Symbol vergeben.
 		\item INV erneut auf den symbolischen Heap legen (INV produzieren).
