@@ -1,0 +1,17 @@
+\tikzset{box/.style ={draw, diamond,   thick, text centered, minimum height=0.5cm, minimum width=1cm}}
+\tikzset{rect/.style={draw, rectangle, thick, text centered, minimum height=0.5cm, minimum width=1cm}}
+\tikzset{circ/.style={draw, circle,    thick, text centered, minimum height=0.5cm, minimum width=1cm}}
+\tikzset{line/.style={draw, -latex',   thick}}
+\begin{tikzpicture}
+	\node [circ, label=east:{x: v0}] (start) {};
+	\node [box, below=0.75cm of start] (cond) {\texttt{x < 0}};
+	\node [rect, label=east:{x: v0, y: -v0}, below=0.75cm of cond, xshift=-2.25cm] (asg1) {\texttt{y = -x}};
+	\node [rect, label=east:{x: v0, y:  v0}, below=0.75cm of cond, xshift= 2.25cm] (asg2) {\texttt{y = x}};
+	\node [circ, label=east:{x: v0, y: -v0}, below=0.75cm of asg1] (end1) {};
+	\node [circ, label=east:{x: v0, y:  v0}, below=0.75cm of asg2] (end2) {};
+	\path [line] (start) -- (cond) node[midway, left] {true};
+	\path [line] (cond)  -- (asg1) node[midway, left] {x < 0\,\,};
+	\path [line] (cond)  -- (asg2) node[midway, left] {x $\geq$ 0\,\,};
+	\path [line] (asg1)  -- (end1) node[midway, left] {x < 0};
+	\path [line] (asg2)  -- (end2) node[midway, left] {x $\geq$ 0};
+\end{tikzpicture}
