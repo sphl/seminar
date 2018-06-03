@@ -11,7 +11,7 @@
 	\node [circ, label=east:{$x = v \wedge y =  x$}, below=0.75cm of asg2] (end2) {};
 	\path [line] (start) -- (cond) node[midway, left] {$true$};
 	\path [line] (cond)  -- (asg1) node[midway, left] {$x < 0\;$};
-	\path [line] (cond)  -- (asg2) node[near end, left] {$x \geq 0\;$};
+	\path [line] (cond)  -- (asg2) node[midway, left] {$x \geq 0\;$};
 	\path [line] (asg1)  -- (end1) node[midway, left] {$x < 0$};
 	\path [line] (asg2)  -- (end2) node[midway, left] {$x \geq 0$};
 \end{tikzpicture}
