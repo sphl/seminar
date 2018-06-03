@@ -159,7 +159,7 @@ Dieser Vorgang hat den Vorteil, dass bei einem Unteraufruf nicht der komplette M
 
 \subsubsection{Prädikate}
 
-Prädikate können dazu eingesetzt werden, Aussagen, die wiederkehrend in unterschiedlichen Methodenkontrakten Verwendung finden, zu kapseln. Über den \texttt{close}-Befehl werden diese durch ein passendes Prädikat gebündelt, wobei die vorherige Assertion durch das entsprechende Prädikat auf dem Heap ersetzt wird. Die entgegengesetzte Wirkung erzielt \texttt{open}, dass ein Prädikat in dessen Bestandteile (Aussagen) zerlegt. \cite{Jacobs2008,Jacobs2017}
+Prädikate werden dazu eingesetzt, Aussagen, die wiederkehrend in unterschiedlichen Methodenkontrakten Verwendung finden, zu kapseln. Über den \texttt{close}-Befehl werden diese durch ein passendes Prädikat gebündelt, wobei die enthaltenen Chunks durch das entsprechende Prädikat auf dem Heap ersetzt werden. Die entgegengesetzte Wirkung erzielt \texttt{open}, dass ein Prädikat in dessen ursprüngliche Aussagen zerlegt. \cite{Jacobs2008,Jacobs2017}
 
 \begin{figure}[hbt!]
 %	\centering
@@ -217,15 +217,15 @@ predicate queue(
 }
 
 \noindent
-Innerhalb der oberen Listings werde neue Variablen mittels \texttt{?var} (Fragezeichen) eingeführt. Der symbolische Wert wird dabei an den Variablennamen gebunden, um somit explizite Aussagen über Werte machen zu können. Anders verhält es sich mit \texttt{\_}, den VeriFast als namenlosen Platzhalter für beliebige Werte ansieht. \cite{Jacobs2017}
+Innerhalb der oberen Listings werde neue Variablen mittels \texttt{?var} eingeführt. Der symbolische Wert wird dabei an den Variablennamen gebunden, um explizite Aussagen über Variablenwerte formulieren zu können. Anders verhält es sich mit \texttt{\_}, dass als namenloser Platzhalter für beliebige Werte von VeriFast interpretiert wird. \cite{Jacobs2017}
 
-\texttt{nodes} beschreibt in diesem Beispiel ein rekursiv definiertes Prädikat, dessen induktive Liste \texttt{vs} den Inhalt zwischen den Knoten \texttt{first} und \texttt{last} repräsentiert. Hierbei setzt sich \texttt{vs} aus dem aktuellen Wert und der Restliste \texttt{vs0}, die sich wiederum aus dem rekursiven Aufruf und dem Folgeknoten von \texttt{first} ergibt, zusammen. Das Abbruchkriterium der Rekursion ist dann erfüllt, wenn \texttt{first} gleicht \texttt{last} ist, dementsprechend keine Zwischenknoten existieren und somit die Restliste leer ist. Hier gilt es zu beachten, dass \texttt{last} zu jeden Zeitpunkt auf einem Hilfsknoten zeigt, welcher keine Nutzdaten speichert. Das zweite Prädikat \texttt{queue} enthält neben \texttt{nodes} weitere Chunks die eine gültige Queue repräsentieren. D.h. nach der erfolgreichen Ausführung von \texttt{create\_queue} befindet sich \texttt{queue}, zusammen mit den entsprechenden Parametern, auf dem symbolischen Heap-Speicher.
+\texttt{nodes} beschreibt in diesem Beispiel ein rekursives Prädikat, dessen induktive Liste \texttt{vs} den Inhalt zwischen den Knoten \texttt{first} und \texttt{last} repräsentiert. Hierbei setzt sich \texttt{vs} aus dem aktuellen Wert und der Restliste \texttt{vs0}, die sich wiederum aus dem rekursiven Aufruf und dem Folgeknoten von \texttt{first} ergibt, zusammen. Das Abbruchkriterium der Rekursion ist dann erfüllt, wenn \texttt{first} gleicht \texttt{last} zutrifft, dementsprechend keine Zwischenknoten existieren und somit die Restliste leer ist. Hier gilt es zu beachten, dass \texttt{last} zu jeden Zeitpunkt auf einem Hilfsknoten zeigt, welcher keine Nutzdaten speichert. Das zweite Prädikat \texttt{queue} enthält neben \texttt{nodes} weitere Chunks und soll eine gültige Queue darstellen. D.h. nach einer erfolgreichen Ausführung von \texttt{create\_queue} befindet sich \texttt{queue}, zusammen mit den entsprechenden Parametern, auf dem symbolischen Heap.
 
 \subsubsection{Schleifeninvarianten}
 
 Eine Schleifeninvariante (INV) ist ein Spezialfall der Invariante. Diese beschreibt eine logische Aussage, die zu Beginn und Ende einer Schleife, sowie nach jedem Schleifendurchgang, gilt bzw. erhalten bleiben muss. INV liefert somit eine \emph{grobe} Aussage über die Semantik des Schleifenrumpfs, die zudem unabhängig von der Anzahl der Schleifendurchgänge gilt.
 
-VeriFast zeigt für Schleifen ausschließlich \emph{partielle Korrektheit}\footnote{Anders als bei \emph{totaler Korrektheit} wird hierbei der Terminierungsnachweis vernachlässigt.}, dessen konkreter Ablauf wie folgt aussieht: \cite{Jacobs2017}
+VeriFast zeigt für Schleifen ausschließlich \emph{partielle Korrektheit}\footnote{Anders als bei \emph{totaler Korrektheit} wird hierbei der Terminierungsnachweis ausgelassen.}, dessen konkreter Ablauf wie folgt aussieht: \cite{Jacobs2017}
 
 \begin{itemize}
 	\item Zeige das INV vor dem ersten Durchlauf gilt (INV konsumieren).
