@@ -223,9 +223,9 @@ Innerhalb der oberen Listings werde neue Variablen mittels \texttt{?var} eingef�
 
 \subsubsection{Schleifeninvarianten}
 
-Eine Schleifeninvariante (INV) ist ein Spezialfall der Invariante. Diese beschreibt eine logische Aussage, die zu Beginn und Ende einer Schleife, sowie nach jedem Schleifendurchgang, gilt bzw. erhalten bleiben muss. INV liefert somit eine \emph{grobe} Aussage über die Semantik des Schleifenrumpfs, die zudem unabhängig von der Anzahl der Schleifendurchgänge gilt.
+Eine Schleifeninvariante (INV) ist ein Spezialfall der Invariante. Diese beschreibt eine logische Aussage, die zu Beginn und Ende einer Schleife, sowie nach jedem Schleifendurchgang, gelten bzw. erhalten bleiben muss. INV liefert somit eine \emph{grobe} Aussage über die Semantik des Schleifenrumpfs, die unabhängig von der Anzahl der Schleifendurchgänge gilt.
 
-VeriFast zeigt für Schleifen ausschließlich \emph{partielle Korrektheit}\footnote{Anders als bei \emph{totaler Korrektheit} wird hierbei der Terminierungsnachweis ausgelassen.}, dessen konkreter Ablauf wie folgt aussieht: \cite{Jacobs2017}
+VeriFast zeigt für Schleifen ausschließlich \emph{partielle Korrektheit}\footnote{Anders als bei \emph{totaler Korrektheit} wird hierbei der Terminierungsnachweis ausgelassen.}, deren Verifikation wie folgt abläuft: \cite{Jacobs2017}
 
 \begin{itemize}
 	\item Zeige das INV vor dem ersten Durchlauf gilt (INV konsumieren).
@@ -246,7 +246,7 @@ VeriFast zeigt für Schleifen ausschließlich \emph{partielle Korrektheit}\footn
 \end{itemize}
 
 \noindent
-Ein Anwendungsfall für eine solche Schleifeninvariante ist in der Funktion \texttt{queue\_destroy} zu finden. Darin wird über all die Knoten in der Queue iteriert, welche die tatsächlichen Nutzdaten speichern, um diese nacheinander freizugeben. D.h. der letzte Hilfsknoten (\texttt{last}) muss außerhalb der Schleife gelöscht werden. Über die Schleifeninvariante gilt es zu zeigen, dass vor der Schleife und nach jedem Schleifendurchlauf das \texttt{nodes}-Prädikat, zusammen mit der passenden Listen-Abstraktion, konsumiert werden kann. 
+Ein Anwendungsfall einer Schleifeninvariante ist in \texttt{queue\_destroy} zu finden. Darin wird über all die Knoten in der Queue iteriert, welche die tatsächlichen Nutzdaten speichern, um diese nacheinander freizugeben. Demzufolge muss der letzte Hilfsknoten (\texttt{last}) außerhalb der Schleife gelöscht werden. Über die Schleifeninvariante gilt es zu zeigen, dass vor der Schleife und nach jedem Schleifendurchlauf das \texttt{nodes}-Prädikat, zusammen mit der passenden Listen-Abstraktion, konsumiert werden kann. 
 
 \begin{lstlisting}
 void queue_destroy(struct queue *q)

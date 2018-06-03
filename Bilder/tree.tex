@@ -1,8 +1,9 @@
-\tikzset{box/.style ={draw, diamond,   thick, text centered, minimum height=0.5cm, minimum width=1cm}}
-\tikzset{rect/.style={draw, rectangle, thick, text centered, minimum height=0.5cm, minimum width=1cm}}
-\tikzset{circ/.style={draw, circle,    thick, text centered, minimum height=0.5cm, minimum width=1cm}}
-\tikzset{line/.style={draw, -latex',   thick}}
-\begin{tikzpicture}
+\begin{tikzpicture}[
+	box/.style ={draw, diamond, thick, text centered, aspect=1.25, inner sep=1.5pt},
+	rect/.style={draw, rectangle, thick, text centered, text height=1.5ex, minimum width=1.5cm, inner sep=4pt},
+	circ/.style={draw, circle, thick, minimum width=0.9cm},
+	line/.style={draw, -latex', thick}
+]
 	\node [circ, label=east:{$x = v$}] (start) {};
 	\node [box, below=0.75cm of start] (cond) {\texttt{x < 0}};
 	\node [rect, label=east:{$x = v \wedge y = -x$}, below=0.75cm of cond, xshift=-2.5cm] (asg1) {\texttt{y = -x}};
@@ -10,8 +11,8 @@
 	\node [circ, label=east:{$x = v \wedge y = -x$}, below=0.75cm of asg1] (end1) {};
 	\node [circ, label=east:{$x = v \wedge y =  x$}, below=0.75cm of asg2] (end2) {};
 	\path [line] (start) -- (cond) node[midway, left] {$true$};
-	\path [line] (cond)  -- (asg1) node[midway, left] {$x < 0\;$};
-	\path [line] (cond)  -- (asg2) node[midway, left] {$x \geq 0\;$};
+	\path [line] (cond)  -- (asg1) node[midway, left] {$x < 0\;\;$};
+	\path [line] (cond)  -- (asg2) node[midway, left] {$x \geq 0\;\;$};
 	\path [line] (asg1)  -- (end1) node[midway, left] {$x < 0$};
 	\path [line] (asg2)  -- (end2) node[midway, left] {$x \geq 0$};
 \end{tikzpicture}
