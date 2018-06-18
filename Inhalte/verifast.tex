@@ -70,7 +70,7 @@ fixpoint int length<t>(list<t> xs) {
 }
 \end{lstlisting}
 
-\subsubsection{malloc\_block Einheiten}
+\subsubsection{Speicherblöcke}
 \label{subsubsuc:malloc}
 
 Charakteristisch für C ist die dynamische Speicherverwaltung mittels \texttt{malloc} und \texttt{free}. Dadurch kann eine festgelegte Anzahl an Bytes angefordert und falls erfolgreich vom Betriebssystem alloziert, über einen Zeigen auf den Heap-Speicher angesprochen werden. Da C über keine automatische \emph{Garbage Collection} (GC) verfügt, steht der Programmierer in der Pflicht den Speicherbereich manuell mit Hilfe von \texttt{free} zu räumen, falls dieser nicht mehr benötigt wird.
@@ -228,19 +228,20 @@ Eine Schleifeninvariante (INV) ist ein Spezialfall der Invariante. Diese beschre
 VeriFast zeigt für Schleifen ausschließlich \emph{partielle Korrektheit}\footnote{Anders als bei \emph{totaler Korrektheit} wird hierbei der Terminierungsnachweis ausgelassen.}, deren Verifikation wie folgt abläuft: \cite{Jacobs2017}
 
 \begin{itemize}
-	\item Zeige das INV vor dem ersten Durchlauf gilt (INV konsumieren).
+	\item Zeige das INV vor dem ersten Durchlauf gilt (INV konsumieren)
 	\item Zeige das INV nach jedem Durchlauf erhalten bleibt:
 	\begin{enumerate}
-		\item Symbolischen Heap temporär räumen und für jeden lokale Variable innerhalb des Schleifenrumpfs ein \emph{frisches} Symbol vergeben.
-		\item INV erneut auf den symbolischen Heap legen (INV produzieren).
-		\item Fallunterscheidung bzgl. der Schleifenbedingung $\epsilon$:
+		\item Symbolischen Heap temporär räumen und für jede lokale Variable innerhalb des Schleifenrumpfs ein \emph{frisches} Symbol vergeben
+		\item INV erneut auf den symbolischen Heap legen (INV produzieren)
+		\item Fallunterscheidung bzgl. der Schleifenbedingung: % $\epsilon$:
 		\begin{itemize}
-			\item $[\![\epsilon]\!] = true:$
+%			\item $[\![\epsilon]\!] = true:$
+			\item Schleifenbedingung erfüllt:
 			\begin{enumerate}
-				\item Schleifenrumpf verifizieren und anschließend INV konsumieren.
-				\item Überprüfung weiterer \emph{Leaks} und Abschluss des Pfades.
+				\item Schleifenrumpf verifizieren und anschließend INV konsumieren
+				\item Überprüfung weiterer \emph{Leaks} und Abschluss des Pfades
 			\end{enumerate}
-			\item Sonst, Heap zurücksetzen und mit der Verifikation des Folgeprogramms fortfahren.
+			\item Sonst, Heap zurücksetzen und mit der Verifikation des Folgeprogramms fortfahren
 		\end{itemize}
 	\end{enumerate}
 \end{itemize}
@@ -273,7 +274,7 @@ void queue_destroy(struct queue *q)
 \subsubsection{Lemma Funktionen}
 \label{subsubsec:lemma}
 
-Lemma Funktionen haben eine starke Ähnlichkeit zu normalen C-Funktion. Der Unterschied besteht darin, dass weder Variablenzuweisungen noch Methodenaufrufe enthalten sein dürfen. Des weiteren muss sichergestellt werden, dass rekursive Lemma Funktion in allen Pfaden terminieren\footnote{Eine genaue Auflistung der zulässigen Rekursionsarten ist in \cite[S. 22]{Jacobs2017} zu finden.}. Ziel einer solchen Funktion ist die Transformation einer Darstellung von Heap-Chunks in eine andere, wobei die zugrunde liegenden Chunks unverändert bleiben. \cite{Jacobs2010}
+Lemma und C-Funktionen sind einander sehr ähnlich, da beide zuerst die Vorbedingung konsumieren und anschließend die Nachbedingung produzieren. Der Unterschied liegt darin, dass weder Variablenzuweisungen noch Methodenaufrufe enthalten sein dürfen. Des weiteren muss sichergestellt werden, dass rekursive Lemma Funktion in allen Pfaden terminieren\footnote{Eine genaue Auflistung der zulässigen Rekursionsarten ist in \cite[S. 22]{Jacobs2017} zu finden.}. Ziel einer solchen Funktion ist die Transformation einer Darstellung von Heap-Chunks in eine andere, wobei die zugrunde liegenden Chunks unverändert bleiben \cite{Jacobs2010}.
 
 In Hinblick auf das Beispiel in \cref{subsec:queue} wird an dieser Stelle die Lemma Funktion \texttt{nodes\_add} vorgestellt.
 
@@ -299,12 +300,12 @@ lemma void nodes_add(struct node *first)
 \end{lstlisting}
 
 \noindent
-Hier fordert \texttt{requires} eine gültige \texttt{nodes}-Abstraktion, in der \texttt{last} einen Folgeknoten besitzt. Dies bedeutet, die Queue wurde um einen Knoten erweitert, welcher noch nicht in der Abstraktion enthalten ist. Hierfür wird \texttt{nodes} innerhalb der Implementierung rekursiv aufgespalten, um anschließend das Prädikat sukzessive mit dem neuen Element erneut zusammenzubauen.
+Hier fordert \texttt{requires} eine gültige \texttt{nodes}-Abstraktion, in der \texttt{last} einen Folgeknoten besitzt. Dies bedeutet, die Queue wurde um einen Knoten erweitert, welcher noch nicht in der Abstraktion enthalten ist. Hierfür wird \texttt{nodes} innerhalb der Implementierung rekursiv aufgespalten, um anschließend das Prädikat sukzessive mit dem neuen Element zusammenzusetzen.
 
 \subsection{Verifikation einer Queue}
 \label{subsec:queue}
 
-Das abschließende Beispiel beschreibt die Funktionen \texttt{queue\_enqueue} und \texttt{queue\_dequeue}, mit deren Hilfe ein neues Element am Ende der Warteschlange eingereiht bzw. das erste und somit älteste Element herausgenommen werden kann. Darüber hinaus wird die Schnittstellenfunktion \texttt{queue\_contains} vorgestellt, welche prüft, ob ein gesuchtes Element innerhalb der Queue enthalten ist.
+Das abschließende Beispiel beschreibt die Funktionen \texttt{queue\_enqueue} und \texttt{queue\_dequeue}, mit deren Hilfe ein neues Element am Ende der Queue eingereiht bzw. das erste und älteste Element herausgenommen werden kann. Darüber hinaus wird die Schnittstellenfunktion \texttt{queue\_contains} vorgestellt, welche prüft, ob ein gesuchtes Element innerhalb der Queue enthalten ist.
 
 \cref{fig:list} veranschaulicht den Zustand der Queue vor und nach der Ausführung von \texttt{queue\_enqueue}. Darin wird das Element $c_{n}$ eingefügt und anschließend \texttt{last} auf den neuen Hilfsknoten ($last_{new}$) gesetzt.
 
@@ -316,9 +317,9 @@ Das abschließende Beispiel beschreibt die Funktionen \texttt{queue\_enqueue} un
 \end{figure}
 
 \noindent
-Innerhalb von \texttt{queue\_enqueue} kann nun die Lemma Funktion \texttt{nodes\_add} aus \cref{subsubsec:lemma} eingesetzt werden, um \texttt{nodes} bzgl. der \emph{gewachsenen} Queue zu aktualisieren.
+Innerhalb von \texttt{queue\_enqueue} kann nun die Lemma Funktion \texttt{nodes\_add} aus \cref{subsubsec:lemma} eingesetzt werden, wodurch \texttt{nodes} erneut den Inhalt der erweiterten Queue abstrahiert.
 
-Die Schnittstellenfunktion \texttt{queue\_dequeue} benötigt hingegen keine zusätzliche Lemma Funktion, da \texttt{nodes(first, last, cons(val, vs))} genau einmal aufgespalten werden muss, um an das geschachtelte Folgeprädikat \texttt{nodes(first->next, last, vs)}\footnote{Abstraktion für den Inhalt der Queue nach dem ersten Element.} zu gelangen, welches im Anschluss wiederum an \texttt{queue} gebunden wird.
+Die Schnittstellenfunktion \texttt{queue\_dequeue} benötigt hingegen keine zusätzliche Lemma Funktion, da \texttt{nodes(first, last, cons(val, vs))} genau einmal aufgespalten werden muss, um an das geschachtelte Folgeprädikat \texttt{nodes(first->next, last, vs)}\footnote{Abstraktion für den Inhalt der Queue nach dem ersten Element.} zu gelangen. Dieses kann dann im nächsten Schritt erneut an \texttt{queue} gebunden werden.
 
 \vspace{-10pt}
 {\noindent
@@ -369,7 +370,9 @@ char queue_dequeue(
 }
 
 \noindent
-Für die Überprüfung, ob ein Element in der Queue enthalten ist, wird die Funktion \texttt{queue\_contains} bereitgestellt. Die eigentliche Implementierung wurde jedoch nach \texttt{nodes\_contains} ausgelagert, um ausgehend vom Startknoten, alle weiteren Knoten rekursiv überprüfen zu können. Dabei wird der Inhalt des Startknotens mit dem gesuchten Element verglichen, dass Ergebnis in einer Variablen zwischengespeichert und anschließend die Funktion erneut mit dem Nachfolger des Startknotens rekursiv aufgerufen. Das Abbruchkriterium ist dann erfüllt, wenn Start- und Endknoten derselbe sind und somit die komplette Queue durchlaufen wurde. Abschließend werde die rekursiv berechneten Teilergebnisse über ein logisches OR miteinander verknüpft, dessen boolescher Ausdruck in der letzten \texttt{return}-Anweisung genau dann zu \emph{wahr} auswertet, wenn der Inhalt von mindestens einem Teilknoten dem des gesuchten Elements entspricht.
+Die Überprüfung, ob ein Element in der Queue enthalten ist, wird durch die Funktion \texttt{queue\_contains} realisiert. Die eigentliche Implementierung wurde jedoch nach \texttt{nodes\_contains} ausgelagert, um ausgehend vom Startknoten, alle weiteren Knoten rekursiv überprüfen zu können. Dabei wird der Inhalt des Startknotens mit dem gesuchten Element verglichen, dass Ergebnis in einer Variablen zwischengespeichert und anschließend die Funktion erneut mit dem Nachfolger des Startknotens aufgerufen.
+
+Das Abbruchkriterium ist dann erfüllt, wenn Start- und Endknoten derselbe sind und somit die komplette Queue durchlaufen wurde. Abschließend werde die rekursiv berechneten Teilergebnisse über ein logisches OR miteinander verknüpft, dessen boolescher Ausdruck in der letzten \texttt{return}-Anweisung genau dann zu \emph{wahr} auswertet, wenn der Inhalt von mindestens einem Teilknoten, dem des gesuchten Elements entspricht.
 
 \vspace{-10pt}
 {\noindent
