@@ -11,7 +11,7 @@ VeriFast erlaubt die Verifikation von \emph{single-} und \emph{multithreaded} C 
 
 Während der Ausführung von VeriFast wird das Programm auf illegale Speicherzugriffe, beispielsweise durch Dereferenzierung von Null-Pointern oder durch Zugriff auf Speicherzellen außerhalb der Grenzen eines Arrays, sowie Fehler aufgrund nebenläufiger Ausführung (\emph{data races}) geprüft \cite{Jacobs2010}. Darüber hinaus verifiziert VeriFast die annotierten Methoden-Kontrakte - d.h. es wird versucht zu zeigen, dass sich die Nachbedingung aus der Vorbedingung und der symbolischen Ausführung des Methodenrumpfs ergibt. Diesbezüglich wird im Back-End der SMT Solver Z3 von Microsoft verwendet.
 
-Über die VeriFast IDE (siehe \vref{fig:vfide}) können Quellcodedateien editiert und Programme schrittweise oder in einem Durchlauf verifiziert werden. Im Falle eines Fehlers werden diese innerhalb des Editors lokalisiert und anhand einer Statusmeldung dem Benutzer mitgeteilt. Wurde die Verifikation erfolgreich durchlaufen, so können abhängig von der ausgewählten Funktion die durchlaufenen Pfade in Form eines Ausführungsbaums, der sich auf der rechten Seite der VeriFast IDE befindet, angezeigt werden. Zudem ermöglicht VeriFast über das Anklicken eines Blattknotens die Analyse einzelner Pfade. Die \emph{steps}-Auswahl in \cref{fig:vfide} listet hierbei die ausgeführten Schritte eines Pfades auf und erlaubt Sprünge zu vorherigen bzw. nachfolgenden Zuständen. Nebenan befinden sich die logischen Annahmen, die sich aus den Annotationen und dem ausgeführten C Code ergeben und somit die \emph{Pfadbedingung} $\Sigma$ bilden. Eine Besonderheit der IDE ist die Anzeige des \emph{symbolischen Heap} $h$, welcher abhängig vom Ausführungsschritt dessen Einträge (\emph{heap chunks}) darstellt. Darüber befindet sich der \emph{symbolische Store} $s$, welcher die Zuordnung der lokalen Variablen auf deren symbolischen Werte verwaltet. Dementsprechend ist der Pfadzustand durch das Tupel $(\Sigma, h, s)$ gegeben \cite{Jacobs2011}.
+Über die VeriFast IDE (siehe \vref{fig:vfide}) können Quellcodedateien editiert und Programme schrittweise oder in einem Durchlauf verifiziert werden. Im Falle eines Fehlers werden diese innerhalb des Editors lokalisiert und anhand einer Statusmeldung dem Benutzer mitgeteilt. Wurde die Verifikation erfolgreich durchlaufen, so können abhängig von der ausgewählten Funktion die durchlaufenen Pfade in Form eines Ausführungsbaums, der sich auf der rechten Seite der VeriFast IDE befindet, angezeigt werden. Zudem ermöglicht VeriFast über das Anklicken eines Blattknotens die Analyse einzelner Pfade. Die \emph{steps}-Auswahl in \cref{fig:vfide} listet hierbei die ausgeführten Schritte eines Pfades auf und erlaubt Sprünge zu vorherigen bzw. nachfolgenden Zuständen. Nebenan befinden sich die logischen Annahmen, die sich aus den Annotationen und dem ausgeführten C Code ergeben und somit die \emph{Pfadbedingung} $\Sigma$ bilden. Eine Besonderheit der IDE ist die Anzeige des \emph{symbolischen Heap} $h$, welcher abhängig vom Ausführungsschritt dessen Einträge (\emph{Heap Chunks}) darstellt. Darüber befindet sich der \emph{symbolische Store} $s$, welcher die Zuordnung der lokalen Variablen auf deren symbolischen Werte verwaltet. Dementsprechend ist der Pfadzustand durch das Tupel $(\Sigma, h, s)$ gegeben \cite{Jacobs2011}.
 
 \subsection{Sprachkonstrukte}
 
@@ -70,7 +70,7 @@ fixpoint int length<t>(list<t> xs) {
 \subsubsection{Speicherblöcke}
 \label{subsubsuc:malloc}
 
-Charakteristisch für C ist die dynamische Speicherverwaltung mittels \texttt{malloc} und \texttt{free}. Dadurch kann eine festgelegte Anzahl an Bytes angefordert und falls erfolgreich vom Betriebssystem alloziert, über einen Zeiger auf den Heap-Speicher angesprochen werden. Da C über keine automatische \emph{Garbage Collection} (GC) verfügt, steht der Programmierer in der Pflicht den Speicherbereich manuell mit Hilfe von \texttt{free} zu räumen, falls dieser nicht mehr benötigt wird. Dementsprechend gilt es auch den Zustand des Heap-Speichers bei der Verifikation von Programmen zu berücksichtigen. Hierbei legt VeriFast sogenannte \emph{chunks} auf dem symbolischen Heap ab, wann immer eine Datenstruktur während der symbolischen Ausführung alloziert wird. Instanzen die über \texttt{malloc} erzeugt wurden, erhalten dabei zusätzlich einen \texttt{malloc\_block} chunk \cite{Jacobs2008,Jacobs2010}. Über diesen Mechanismus kann vor der Freigabe überprüft werden, ob die zu löschende Instanz über einen gültigen \texttt{malloc\_block} Eintrag verfügt.
+Charakteristisch für C ist die dynamische Speicherverwaltung mittels \texttt{malloc} und \texttt{free}. Dadurch kann eine festgelegte Anzahl an Bytes angefordert und falls erfolgreich vom Betriebssystem alloziert, über einen Zeiger auf den Heap-Speicher angesprochen werden. Da C über keine automatische \emph{Garbage Collection} (GC) verfügt, steht der Programmierer in der Pflicht den Speicherbereich manuell mit Hilfe von \texttt{free} zu räumen, falls dieser nicht mehr benötigt wird. Dementsprechend gilt es auch den Zustand des Heap-Speichers bei der Verifikation von Programmen zu berücksichtigen. Hierbei legt VeriFast sogenannte \emph{Chunks} auf dem symbolischen Heap ab, wann immer eine Datenstruktur während der symbolischen Ausführung alloziert wird. Instanzen die über \texttt{malloc} erzeugt wurden, erhalten dabei zusätzlich einen \texttt{malloc\_block} chunk \cite{Jacobs2008,Jacobs2010}. Über diesen Mechanismus kann vor der Freigabe überprüft werden, ob die zu löschende Instanz über einen gültigen \texttt{malloc\_block} Eintrag verfügt.
 
 Das nachfolgende Listing zeigt die beiden C-Strukturen \texttt{node} und \texttt{queue}. Erstere stellt einen Knoten in einer einfach verketteten Liste dar, welche neben einer Variablen vom Typ \texttt{char} einen Zeiger auf das nächste Listenelement enthält. \texttt{queue} verfügt über zwei Zeiger die jeweils auf das erste bzw. letzte Element einer Warteschlange zeigen. Darüber hinaus ist die Funktion \texttt{create\_queue}\footnote{Die Funktionen \texttt{requires}, \texttt{ensures} und \texttt{close} werden erst in den darauffolgenden Abschnitten erklärt und können in diesem Beispiel übersprungen werden.} zu sehen, welche Heap-Speicher für eine neue Queue alloziert und anschließend den Variablen \texttt{first} und \texttt{last} initial den gleichen Knoten zuweist.
 
@@ -132,14 +132,14 @@ struct queue *create_queue()
 		\texttt{q->last |-> n}           & Feld \texttt{last} zeigt auf Instanz \texttt{n}           \\ \hline
 		%-----------------------------------------------------------------------------------------------------
 	\end{tabularx}
-	\caption{Heap chunks}
+	\caption{Heap Chunks}
 	\label{tab:heap-chunks}
 \end{table}
 }
 
 \subsubsection{Kontrakte}
 
-Kontrakte beschreiben einen Vertrag zwischen dem Aufrufer einer Methode und deren Implementierung. Dabei besitzt jede Methodendeklaration eine Vor- und Nachbedingung die angeben, dass wenn die Vorbedingung (vom Aufrufer) erfüllt wird, die Nachbedingung von der Implementierung der Methode zugesichert werden kann. Zuvor gilt es allerdings für jeden Kontrakt zu zeigen, dass die Nachbedingung aus der Vorbedingung und dem finalen Pfadzustand folgt. Kontrakte werden auch von VeriFast eingelesen um die Korrektheit von C-Funktionen nachzuweisen. Für die Vor- und Nachbedingung stehen die Annotationen \texttt{requires} und \texttt{ensures} zur Verfügung, deren Bedingung in Form einer Formel definiert wird. Diese setzt sich wiederum aus Heap chunks und booleschen Ausdrücken zusammen, welche mittels \emph{Separation Conjunction} $(\&{*}\&)$ (Bestandteil der \emph{Separation Logic}) kombiniert werden.
+Kontrakte beschreiben einen Vertrag zwischen dem Aufrufer einer Methode und deren Implementierung. Dabei besitzt jede Methodendeklaration eine Vor- und Nachbedingung die angeben, dass wenn die Vorbedingung (vom Aufrufer) erfüllt wird, die Nachbedingung von der Implementierung der Methode zugesichert werden kann. Zuvor gilt es allerdings für jeden Kontrakt zu zeigen, dass die Nachbedingung aus der Vorbedingung und dem finalen Pfadzustand folgt. Kontrakte werden auch von VeriFast eingelesen um die Korrektheit von C-Funktionen nachzuweisen. Für die Vor- und Nachbedingung stehen die Annotationen \texttt{requires} und \texttt{ensures} zur Verfügung, deren Bedingung in Form einer Formel definiert wird. Diese setzt sich wiederum aus Heap Chunks und booleschen Ausdrücken zusammen, welche mittels \emph{Separation Conjunction} $(\&{*}\&)$ (Bestandteil der \emph{Separation Logic}) kombiniert werden.
 
 Allgemein beschreibt Separation Logic eine Erweiterung der \emph{Hoare Logic}, welche Schlussfolgerungen über geteilte, änderbare Datenstrukturen, wie bspw. der Heap-Speicher in Java und C, erlaubt \cite{Reynolds2002}. Die Konjunktion $C_{1} \; \&{*}\& \; C_{2}$ beschreibt dabei, dass $C_{1}$ und $C_{2}$ auf disjunkten Speicherbereichen gelten und somit Änderungen keinen Einfluss bzw. Nebeneffekte auf andere Bereiche des Speichers haben.
 
@@ -147,26 +147,25 @@ Um zu zeigen das die Vorbedingung bei einem Methodenaufruf erfüllt wird, versuc
 
 \subsubsection{Prädikate}
 
-Prädikate werden dazu eingesetzt, Aussagen, die wiederkehrend in unterschiedlichen Methodenkontrakten Verwendung finden, zu kapseln. Über den \texttt{close}-Befehl werden diese durch ein passendes Prädikat gebündelt, wobei die enthaltenen Chunks durch das entsprechende Prädikat auf dem Heap ersetzt werden. Die entgegengesetzte Wirkung erzielt \texttt{open}, dass ein Prädikat in dessen ursprüngliche Aussagen zerlegt. \cite{Jacobs2008,Jacobs2017}
+Prädikate werden dazu eingesetzt, Aussagen, die wiederkehrend in unterschiedlichen Methodenkontrakten Verwendung finden, zu kapseln. Über den \texttt{close}-Befehl werden diese durch ein passendes Prädikat gebündelt, wobei die enthaltenen Chunks durch das entsprechende Prädikat auf dem Heap ersetzt werden. Die entgegengesetzte Wirkung erzielt \texttt{open}, dass ein Prädikat in dessen ursprüngliche Aussagen zerlegt \cite{Jacobs2008,Jacobs2017}.
 
-\begin{figure}[hbt!]
-%	\centering
+\begin{figure}[t]
+	\centering
 	\begin{minipage}{.45\textwidth}
-%		\centering
+		\centering
 		\input{Bilder/nodes}
 		\captionof{figure}{Prädikat \texttt{nodes}}
 		\label{fig:nodes}
 	\end{minipage}
 	\hfill
 	\begin{minipage}{.45\textwidth}
-%		\centering
+		\centering
 		\input{Bilder/queue}
 		\captionof{figure}{Prädikat \texttt{queue}}
 		\label{fig:queue}
 	\end{minipage}
 \end{figure}
 
-\noindent
 \cref{fig:nodes} veranschaulicht die erste \texttt{close}-Anweisung in \texttt{create\_queue} aus \cref{subsubsuc:malloc}. In dieser Abstraktion wird ein Teil der generierten Chunks ($C_{3},\ldots,C_{6}$) durch das Prädikat \texttt{nodes} gekapselt, dass wiederum in \texttt{queue} enthalten ist (vgl. \cref{fig:queue}). Die konkrete Implementierung der beiden Prädikate sieht somit wie folgt aus.
 
 \vspace{-10pt}
@@ -205,9 +204,7 @@ predicate queue(
 }
 
 \noindent
-Innerhalb der oberen Listings werde neue Variablen mittels \texttt{?var} eingeführt. Der symbolische Wert wird dabei an den Variablennamen gebunden, um explizite Aussagen über Variablenwerte formulieren zu können. Anders verhält es sich mit \texttt{\_}, dass als namenloser Platzhalter für beliebige Werte von VeriFast interpretiert wird. \cite{Jacobs2017}
-
-\texttt{nodes} beschreibt in diesem Beispiel ein rekursives Prädikat, dessen induktive Liste \texttt{vs} den Inhalt zwischen den Knoten \texttt{first} und \texttt{last} repräsentiert. Hierbei setzt sich \texttt{vs} aus dem aktuellen Wert und der Restliste \texttt{vs0}, die sich wiederum aus dem rekursiven Aufruf und dem Folgeknoten von \texttt{first} ergibt, zusammen. Das Abbruchkriterium der Rekursion ist dann erfüllt, wenn \texttt{first} gleicht \texttt{last} zutrifft, dementsprechend keine Zwischenknoten existieren und somit die Restliste leer ist. Hier gilt es zu beachten, dass \texttt{last} zu jeden Zeitpunkt auf einem Hilfsknoten zeigt, welcher keine Nutzdaten speichert. Das zweite Prädikat \texttt{queue} enthält neben \texttt{nodes} weitere Chunks und soll eine gültige Queue darstellen. D.h. nach einer erfolgreichen Ausführung von \texttt{create\_queue} befindet sich \texttt{queue}, zusammen mit den entsprechenden Parametern, auf dem symbolischen Heap.
+Innerhalb der oberen Listings werde neue Variablen mittels \texttt{?var} eingeführt. Der symbolische Wert wird dabei an den Variablennamen gebunden, um explizite Aussagen über Variablenwerte formulieren zu können. Anders verhält es sich mit \texttt{\_}, dass als namenloser Platzhalter für beliebige Werte von VeriFast interpretiert wird \cite{Jacobs2017}. \texttt{nodes} beschreibt in diesem Beispiel ein rekursives Prädikat, dessen induktive Liste \texttt{vs} den Inhalt zwischen den Knoten \texttt{first} und \texttt{last} repräsentiert. Hierbei setzt sich \texttt{vs} aus dem aktuellen Wert und der Restliste \texttt{vs0}, die sich wiederum aus dem rekursiven Aufruf und dem Folgeknoten von \texttt{first} ergibt, zusammen. Das Abbruchkriterium der Rekursion ist dann erfüllt, wenn \texttt{first} gleicht dem Knoten \texttt{last} ist, dementsprechend keine Zwischenknoten existieren und somit die Restliste leer ist. Hier gilt es zu beachten, dass \texttt{last} zu jeden Zeitpunkt auf einem Hilfsknoten zeigt, welcher keine Nutzdaten speichert. Das zweite Prädikat \texttt{queue} enthält neben \texttt{nodes} weitere Chunks und soll eine gültige Queue darstellen. D.h. nach einer erfolgreichen Ausführung von \texttt{create\_queue} befindet sich \texttt{queue}, zusammen mit den entsprechenden Parametern, auf dem symbolischen Heap.
 
 \subsubsection{Schleifeninvarianten}
 
@@ -223,6 +220,7 @@ VeriFast zeigt für Schleifen ausschließlich \emph{partielle Korrektheit}\footn
 		\item INV erneut auf den symbolischen Heap legen (INV produzieren)
 		\item Fallunterscheidung bzgl. der Schleifenbedingung: % $\epsilon$:
 		\begin{itemize}
+			\setlength\itemsep{1ex}
 %			\item $[\![\epsilon]\!] = true:$
 			\item Schleifenbedingung erfüllt:
 			\begin{enumerate}
