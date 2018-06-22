@@ -88,6 +88,14 @@ struct queue *create_queue()
 
 In diesem Abschnitt werden einige Konzepte vorgestellt die VeriFast für die Programmverifikation bereitstellt. Dabei werden vorzugsweise die Konzepte behandelt, welche für das Verständnis des Beispiels in \cref{subsec:queue} relevant sind. Weiterführende Konzepte und Beispiele können in \cite{Jacobs2017} nachgelesen werden.
 
+\subsubsection{Kontrakte}
+
+Kontrakte beschreiben einen Vertrag zwischen dem Aufrufer einer Methode und deren Implementierung. Dabei besitzt jede Methodendeklaration eine Vor- und Nachbedingung die angeben, dass wenn die Vorbedingung (vom Aufrufer) erfüllt wird, die Nachbedingung von der Implementierung der Methode zugesichert werden kann. Zuvor gilt es allerdings für jeden Kontrakt zu zeigen, dass die Nachbedingung aus der Vorbedingung und dem finalen Pfadzustand folgt. Dieser Ansatz, der als \emph{Design-by-Contract} bezeichnet wird, wird auch von VeriFast verwendet, um die Korrektheit von C-Funktionen nachzuweisen. Für die Vor- und Nachbedingung stehen die Annotationen \texttt{requires} und \texttt{ensures} zur Verfügung, deren Bedingung in Form einer Formel definiert wird. Diese setzt sich wiederum aus Heap Chunks und booleschen Ausdrücken zusammen, welche mittels \emph{Separation Conjunction} $(\&{*}\&)$ (Bestandteil der \emph{Separation Logic}) kombiniert werden.
+
+Allgemein beschreibt Separation Logic eine Erweiterung der \emph{Hoare Logic}, welche Schlussfolgerungen über geteilte, änderbare Datenstrukturen, wie bspw. der Heap-Speicher in Java und C, erlaubt \cite{Reynolds2002}. Die Konjunktion $C_{1} \; \&{*}\& \; C_{2}$ beschreibt dabei, dass $C_{1}$ und $C_{2}$ auf disjunkten Speicherbereichen gelten und somit Änderungen keinen Einfluss bzw. Nebeneffekte auf andere Bereiche des Speichers haben.
+
+Um zu zeigen das die Vorbedingung bei einem Methodenaufruf erfüllt wird, versucht VeriFast die in \texttt{requires} hinterlegte Formel zu \emph{konsumieren}. D.h. die enthaltenen Chunks und logischen Ausdrücke werden vom symbolischen Heap bzw. aus der Liste der Pfadannahmen entfernt. Ist dies nicht möglich, da bspw. ein zu konsumierender Chunk auf dem Heap nicht vorhanden ist, so schlägt die Verifikation fehl. Konnte hingegen die Vorbedingung gezeigt werden, so \emph{produziert} VeriFast neue Einträge für die in \texttt{ensures} enthaltene Formel \cite{Jacobs2017}. Dieser Vorgang hat den Vorteil, dass bei einem Unteraufruf nicht der komplette Methodenrumpf durchlaufen werden muss, sondern VeriFast lediglich die spezifizierte Formel konsumiert und produziert.
+
 \subsubsection{Induktive Datentypen}
 \label{subsubsec:adt}
 
@@ -137,14 +145,6 @@ fixpoint int length<t>(list<t> xs) {
   }
 }
 \end{lstlisting}
-
-\subsubsection{Kontrakte}
-
-Kontrakte beschreiben einen Vertrag zwischen dem Aufrufer einer Methode und deren Implementierung. Dabei besitzt jede Methodendeklaration eine Vor- und Nachbedingung die angeben, dass wenn die Vorbedingung (vom Aufrufer) erfüllt wird, die Nachbedingung von der Implementierung der Methode zugesichert werden kann. Zuvor gilt es allerdings für jeden Kontrakt zu zeigen, dass die Nachbedingung aus der Vorbedingung und dem finalen Pfadzustand folgt. Dieser Ansatz, der als \emph{Design-by-Contract} bezeichnet wird, wird auch von VeriFast verwendet, um die Korrektheit von C-Funktionen nachzuweisen. Für die Vor- und Nachbedingung stehen die Annotationen \texttt{requires} und \texttt{ensures} zur Verfügung, deren Bedingung in Form einer Formel definiert wird. Diese setzt sich wiederum aus Heap Chunks und booleschen Ausdrücken zusammen, welche mittels \emph{Separation Conjunction} $(\&{*}\&)$ (Bestandteil der \emph{Separation Logic}) kombiniert werden.
-
-Allgemein beschreibt Separation Logic eine Erweiterung der \emph{Hoare Logic}, welche Schlussfolgerungen über geteilte, änderbare Datenstrukturen, wie bspw. der Heap-Speicher in Java und C, erlaubt \cite{Reynolds2002}. Die Konjunktion $C_{1} \; \&{*}\& \; C_{2}$ beschreibt dabei, dass $C_{1}$ und $C_{2}$ auf disjunkten Speicherbereichen gelten und somit Änderungen keinen Einfluss bzw. Nebeneffekte auf andere Bereiche des Speichers haben.
-
-Um zu zeigen das die Vorbedingung bei einem Methodenaufruf erfüllt wird, versucht VeriFast die in \texttt{requires} hinterlegte Formel zu \emph{konsumieren}. D.h. die enthaltenen Chunks und logischen Ausdrücke werden vom symbolischen Heap bzw. aus der Liste der Pfadannahmen entfernt. Ist dies nicht möglich, da bspw. ein zu konsumierender Chunk auf dem Heap nicht vorhanden ist, so schlägt die Verifikation fehl. Konnte hingegen die Vorbedingung gezeigt werden, so \emph{produziert} VeriFast neue Einträge für die in \texttt{ensures} enthaltene Formel \cite{Jacobs2017}. Dieser Vorgang hat den Vorteil, dass bei einem Unteraufruf nicht der komplette Methodenrumpf durchlaufen werden muss, sondern VeriFast lediglich die spezifizierte Formel konsumiert und produziert.
 
 \subsubsection{Prädikate}
 
