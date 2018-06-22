@@ -114,7 +114,7 @@ In diesem Beispiel wurde eine generische Liste mit den Konstruktoren \texttt{nil
 
 Neben den induktiven ADTs unterstützt VeriFast die Spezifikation von Fixpunkt Funktionen, wodurch spezifische Operation auf induktive Datentypen definiert werden können. Diese werden mit \texttt{fixpoint} eingeleitet und erhalten über die Parameterliste einen oder mehrere ADTs. Im Funktionsrumpf kann entweder direkt eine \texttt{return}-Anweisung, welche die berechnete Eigenschaft an den Aufrufer zurückgibt, oder eine \texttt{switch}-Anweisung stehen. Letztere führt eine Fallunterscheidung bezüglich aller Konstruktoren von genau einem induktiven Argument aus. Zudem prüft VeriFast jede Funktion auf Terminierung - d.h. im Falle eines rekursiven Aufrufs muss der neue Konstruktorterm des Übergabeparameters ein Teilterm des alten Parameters sein \cite{Jacobs2010}.
 
-Ausgehend von der induktiven Liste in \cref{subsubsec:adt}, definieren wir die beiden Funktionen \texttt{head} und \texttt{tail}, welche das Kopfelement bzw. die Restliste des Fixpunkts \texttt{xs} zurückliefern.
+Ausgehend von der induktiven Liste in \cref{subsubsec:adt}, definieren wir die beiden Funktionen \texttt{head} und \texttt{tail}, welche das Kopfelement bzw. die Restliste von \texttt{xs} zurückliefern.
 
 \begin{lstlisting}
 fixpoint t head<t>(list<t> xs) {
@@ -168,8 +168,6 @@ Prädikate werden dazu eingesetzt, Aussagen, die wiederkehrend in unterschiedlic
 
 Das nachfolgende Listing zeigt die Prädikate \texttt{nodes} und \texttt{queue}, die in den beiden \texttt{close}-Anweisungen der Funktion \texttt{create\_queue} aus \cref{subsuc:malloc} verwendet wurden.
 
-%\cref{fig:nodes} veranschaulicht die erste \texttt{close}-Anweisung in \texttt{create\_queue} aus \cref{subsuc:malloc}. In dieser Abstraktion wird ein Teil der generierten Chunks ($C_{3},\ldots,C_{6}$) durch das Prädikat \texttt{nodes} gekapselt, dass wiederum in \texttt{queue} enthalten ist (vgl. \cref{fig:queue}). Die konkrete Implementierung der beiden Prädikate sieht somit wie folgt aus.
-
 \vspace{-10pt}
 {\noindent
 \begin{minipage}[t]{.45\textwidth}
@@ -206,11 +204,13 @@ predicate queue(
 }
 
 \noindent
-Innerhalb der oberen Listings werde neue Variablen mittels \texttt{?var} eingeführt. Der symbolische Wert wird dabei an den Variablennamen gebunden, um explizite Aussagen über Variablenwerte formulieren zu können. Anders verhält es sich mit \texttt{\_}, dass als namenloser Platzhalter für beliebige Werte von VeriFast interpretiert wird \cite{Jacobs2017}. \texttt{nodes} beschreibt in diesem Beispiel ein rekursives Prädikat, dessen induktive Liste \texttt{vs} den Inhalt zwischen den Knoten \texttt{first} und \texttt{last} repräsentiert. Hierbei setzt sich \texttt{vs} aus dem aktuellen Wert und der Restliste \texttt{vs0}, die sich wiederum aus dem rekursiven Aufruf und dem Folgeknoten von \texttt{first} ergibt, zusammen. Das Abbruchkriterium der Rekursion ist dann erfüllt, wenn \texttt{first} gleicht dem Knoten \texttt{last} ist, dementsprechend keine Zwischenknoten existieren und somit die Restliste leer ist. Hier gilt es zu beachten, dass \texttt{last} zu jeden Zeitpunkt auf einem Hilfsknoten zeigt, welcher keine Nutzdaten speichert. Das zweite Prädikat \texttt{queue} enthält neben \texttt{nodes} weitere Chunks und soll eine gültige Queue darstellen. D.h. nach einer erfolgreichen Ausführung von \texttt{create\_queue} befindet sich \texttt{queue}, zusammen mit den entsprechenden Parametern, auf dem symbolischen Heap.
+Innerhalb des Listings werde neue Variablen mittels \texttt{?var} eingeführt. Der symbolische Wert wird dabei an den Variablennamen gebunden, um explizite Aussagen über Variablenwerte formulieren zu können. Anders verhält es sich mit \texttt{\_}, dass als namenloser Platzhalter für beliebige Werte von VeriFast interpretiert wird \cite{Jacobs2017}. \texttt{nodes} beschreibt in diesem Beispiel ein rekursives Prädikat, dessen induktive Liste \texttt{vs} den Inhalt zwischen den Knoten \texttt{first} und \texttt{last} repräsentiert. Hierbei setzt sich \texttt{vs} aus dem aktuellen Wert und der Restliste \texttt{vs0}, die sich wiederum aus dem rekursiven Aufruf und dem Folgeknoten von \texttt{first} ergibt, zusammen.
+
+Das Abbruchkriterium der Rekursion ist dann erfüllt, wenn \texttt{first} gleicht dem Knoten \texttt{last} ist, dementsprechend keine Zwischenknoten existieren und somit die Restliste leer ist. Hier gilt es zu beachten, dass \texttt{last} zu jeden Zeitpunkt auf einem Hilfsknoten zeigt, welcher keine Nutzdaten speichert. Das zweite Prädikat \texttt{queue} enthält neben \texttt{nodes} weitere Chunks und soll eine gültige Queue darstellen. %D.h. nach einer erfolgreichen Ausführung von \texttt{create\_queue} befindet sich \texttt{queue}, zusammen mit den entsprechenden Parametern, auf dem symbolischen Heap.
 
 \subsubsection{Schleifeninvarianten}
 
-Eine Schleifeninvariante (INV) ist ein Spezialfall der Invariante. Diese beschreibt eine logische Aussage, die zu Beginn und Ende einer Schleife, sowie nach jedem Schleifendurchgang, gelten bzw. erhalten bleiben muss. INV liefert somit eine grobe Aussage über die Semantik des Schleifenrumpfs, die unabhängig von der Anzahl der Schleifendurchgänge gilt.
+Eine Schleifeninvariante (INV) ist ein Spezialfall einer Invariante. Diese beschreibt eine logische Aussage, die zu Beginn und Ende einer Schleife, sowie nach jedem Schleifendurchgang, gelten bzw. erhalten bleiben muss. INV liefert somit eine Aussage über die Semantik des Schleifenrumpfs, die unabhängig von der Anzahl der Schleifendurchgänge gilt.
 
 VeriFast zeigt für Schleifen ausschließlich \emph{partielle Korrektheit}\footnote{Anders als bei \emph{totaler Korrektheit} wird hierbei der Terminierungsnachweis ausgelassen.}, deren Verifikation wie folgt abläuft: \cite{Jacobs2017}
 
@@ -223,7 +223,7 @@ VeriFast zeigt für Schleifen ausschließlich \emph{partielle Korrektheit}\footn
 		\item Fallunterscheidung bzgl. der Schleifenbedingung: % $\epsilon$:
 		\begin{itemize}
 			% Vergroeßere den Abstand zwischen zwei Items, um diese besser lesbar zu machen
-%			\setlength\itemsep{1ex}
+			\setlength\itemsep{3pt}
 %			\item $[\![\epsilon]\!] = true:$
 			\item Schleifenbedingung erfüllt:
 			\begin{enumerate}
@@ -303,7 +303,7 @@ Im Verlauf dieser Sektion werden die Funktionen \texttt{queue\_enqueue} und \tex
 	\label{fig:list}
 \end{figure}
 
-\cref{fig:list} veranschaulicht den Zustand der Queue vor und nach der Ausführung von \texttt{queue\_enqueue}. Darin wird das Element $c_{n}$ eingefügt und anschließend \texttt{last} auf den neuen Hilfsknoten ($last_{new}$) gesetzt. Innerhalb von \texttt{queue\_enqueue} kann nun die Lemma Funktion \texttt{nodes\_add} aus \cref{subsubsec:lemma} eingesetzt werden, wodurch \texttt{nodes} erneut den Inhalt der erweiterten Queue abstrahiert. Die Schnittstellenfunktion \texttt{queue\_dequeue} benötigt hingegen keine zusätzliche Lemma Funktion, da \texttt{nodes(first, last, cons(val, vs))} genau einmal aufgespalten werden muss, um an das geschachtelte Folgeprädikat \texttt{nodes(first->next, last, vs)}\footnote{Abstraktion für den Inhalt der Queue nach dem ersten Element.} zu gelangen. Dieses kann dann im nächsten Schritt erneut an \texttt{queue} gebunden werden.
+\cref{fig:list} veranschaulicht den Zustand der Queue vor und nach der Ausführung von \texttt{queue\_enqueue}. Darin wird das Element $c_{n}$ eingefügt und anschließend \texttt{last} auf den neuen Hilfsknoten ($last_{new}$) gesetzt. Innerhalb von \texttt{queue\_enqueue} kann nun die Lemma Funktion \texttt{nodes\_add} aus \cref{subsubsec:lemma} eingesetzt werden, wodurch \texttt{nodes} erneut den Inhalt der erweiterten Queue abstrahiert. Die Schnittstellenfunktion \texttt{queue\_dequeue} benötigt hingegen keine zusätzliche Lemma Funktion, da \texttt{nodes(first, last, cons(val, vs))} genau einmal aufgespalten werden muss, um an das geschachtelte Folgeprädikat \texttt{nodes(first->next, last, vs)} zu gelangen. Dieses kann dann im nächsten Schritt erneut an \texttt{queue} gebunden werden.
 
 \vspace{-10pt}
 {\noindent
