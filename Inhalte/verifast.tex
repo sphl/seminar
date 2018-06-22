@@ -140,7 +140,7 @@ fixpoint int length<t>(list<t> xs) {
 
 \subsubsection{Kontrakte}
 
-Kontrakte beschreiben einen Vertrag zwischen dem Aufrufer einer Methode und deren Implementierung. Dabei besitzt jede Methodendeklaration eine Vor- und Nachbedingung die angeben, dass wenn die Vorbedingung (vom Aufrufer) erfüllt wird, die Nachbedingung von der Implementierung der Methode zugesichert werden kann. Zuvor gilt es allerdings für jeden Kontrakt zu zeigen, dass die Nachbedingung aus der Vorbedingung und dem finalen Pfadzustand folgt. Kontrakte werden auch von VeriFast eingelesen um die Korrektheit von C-Funktionen nachzuweisen. Für die Vor- und Nachbedingung stehen die Annotationen \texttt{requires} und \texttt{ensures} zur Verfügung, deren Bedingung in Form einer Formel definiert wird. Diese setzt sich wiederum aus Heap Chunks und booleschen Ausdrücken zusammen, welche mittels \emph{Separation Conjunction} $(\&{*}\&)$ (Bestandteil der \emph{Separation Logic}) kombiniert werden.
+Kontrakte beschreiben einen Vertrag zwischen dem Aufrufer einer Methode und deren Implementierung. Dabei besitzt jede Methodendeklaration eine Vor- und Nachbedingung die angeben, dass wenn die Vorbedingung (vom Aufrufer) erfüllt wird, die Nachbedingung von der Implementierung der Methode zugesichert werden kann. Zuvor gilt es allerdings für jeden Kontrakt zu zeigen, dass die Nachbedingung aus der Vorbedingung und dem finalen Pfadzustand folgt. Dieser Ansatz, der als \emph{Design-by-Contract} bezeichnet wird, wird auch von VeriFast verwendet, um die Korrektheit von C-Funktionen nachzuweisen. Für die Vor- und Nachbedingung stehen die Annotationen \texttt{requires} und \texttt{ensures} zur Verfügung, deren Bedingung in Form einer Formel definiert wird. Diese setzt sich wiederum aus Heap Chunks und booleschen Ausdrücken zusammen, welche mittels \emph{Separation Conjunction} $(\&{*}\&)$ (Bestandteil der \emph{Separation Logic}) kombiniert werden.
 
 Allgemein beschreibt Separation Logic eine Erweiterung der \emph{Hoare Logic}, welche Schlussfolgerungen über geteilte, änderbare Datenstrukturen, wie bspw. der Heap-Speicher in Java und C, erlaubt \cite{Reynolds2002}. Die Konjunktion $C_{1} \; \&{*}\& \; C_{2}$ beschreibt dabei, dass $C_{1}$ und $C_{2}$ auf disjunkten Speicherbereichen gelten und somit Änderungen keinen Einfluss bzw. Nebeneffekte auf andere Bereiche des Speichers haben.
 
@@ -401,9 +401,6 @@ bool queue_contains(
 \end{lstlisting}
 \end{minipage}
 }
-
-\noindent
-Weitere Fallstudien, in denen VeriFast innerhalb Java Smart Card Anwendungen, eines Linux Keyboard Gerätetreibers und einer eingebetteten Linux Netzwerkmanager Komponente eingesetzt wurde, können in \cite{Philippaerts2013} nachgelesen werden.
 
 %\subsection{Praxis Fallstudien}
 
