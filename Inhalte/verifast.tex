@@ -61,7 +61,7 @@ struct queue *create_queue()
 \noindent
 \cref{tab:heap-chunks} zeigt einen Ausschnitt des symbolischen Heap-Speichers während der Ausführung von \texttt{create\_queue}. Dabei stehen die symbolischen Werte \texttt{value1} und \texttt{value2} für beliebige Werte, da keine konkrete Zuweisung für die Variablen \texttt{next} und \texttt{value} des Knotens \texttt{n} vorgenommen wurde.
 
-{\setlength\extrarowheight{5pt} % Vergroeßert den Zeilenabstand
+{\setlength\extrarowheight{3pt} % Vergroeßert den Zeilenabstand
 \begin{table}[hbt!]
 %	\centering
 	\caption{Heap-Chunks}
@@ -123,7 +123,6 @@ fixpoint t head<t>(list<t> xs) {
     case cons(x, xs0): return x;
   }
 }
-
 fixpoint list<t> tail<t>(list<t> xs) {
   switch (xs) {
     case nil: return nil;
@@ -135,7 +134,7 @@ fixpoint list<t> tail<t>(list<t> xs) {
 \noindent
 Für den Konstruktor \texttt{cons(t, list<t>)} bindet VeriFast die entsprechenden Werte an die Variablen \texttt{x} und \texttt{xs0}, welche im Anschluss beliebig weiterverwendet werden können. Ein Sonderfall in diesem Beispiel ist der Konstruktor \texttt{nil} in \texttt{head}. Hierbei wird ein Defaultwert zurückgegeben, der je nach Anforderung und Datentyp unterschiedliche Werte annehmen kann.
 
-Eine weitere bekannte Funktion auf Container-Datentypen ist \texttt{length}, welche in diesem Beispiel die Länge einer Liste rekursiv berechnet. Wurde ein Term ungleich \texttt{nil} übergeben, so wird dieser sukzessive abgebaut und zugleich die Länge um den Wert 1 erhöht. Der letzte Aufruf endet immer im \texttt{nil}-Konstruktor, welcher folgerichtig den die Länge 0 zurückgibt und damit die Berechnung abschließt.\footnote{Die Funktionen \texttt{head}, \texttt{tail}, \texttt{length} und weitere Fixpunkt-Operationen auf \texttt{list<t>} sind Bestandteil der VeriFast-Bibliothek.}
+Eine weitere bekannte Funktion auf Container-Datentypen ist \texttt{length}, welche in diesem Beispiel die Länge einer Liste rekursiv berechnet. Wurde ein Term ungleich \texttt{nil} übergeben, so wird dieser sukzessive abgebaut und zugleich die Länge um den Wert 1 erhöht. Der letzte Aufruf endet immer im \texttt{nil}-Konstruktor, welcher folgerichtig den die Länge 0 zurückgibt und damit die Berechnung abschließt.%\footnote{Die Funktionen \texttt{head}, \texttt{tail}, \texttt{length} und weitere Fixpunkt-Operationen auf \texttt{list<t>} sind Bestandteil der VeriFast-Bibliothek.}
 
 \begin{lstlisting}
 fixpoint int length<t>(list<t> xs) {
@@ -150,24 +149,26 @@ fixpoint int length<t>(list<t> xs) {
 
 Prädikate werden dazu eingesetzt, Aussagen, die wiederkehrend in unterschiedlichen Methodenkontrakten Verwendung finden, zu kapseln. Über den \texttt{close}-Befehl werden diese durch ein passendes Prädikat gebündelt, wobei die enthaltenen Chunks durch das entsprechende Prädikat auf dem Heap ersetzt werden. Die entgegengesetzte Wirkung erzielt \texttt{open}, dass ein Prädikat in dessen ursprüngliche Aussagen zerlegt \cite{Jacobs2008,Jacobs2017}.
 
-\begin{figure}[t]
-	\centering
-	\begin{minipage}{.45\textwidth}
-		\centering
-		\input{Bilder/nodes}
-		\captionof{figure}{Prädikat \texttt{nodes}}
-		\label{fig:nodes}
-	\end{minipage}
-	\hfill
-	\begin{minipage}{.45\textwidth}
-		\centering
-		\input{Bilder/queue}
-		\captionof{figure}{Prädikat \texttt{queue}}
-		\label{fig:queue}
-	\end{minipage}
-\end{figure}
+%\begin{figure}[t]
+%	\centering
+%	\begin{minipage}{.45\textwidth}
+%		\centering
+%		\input{Bilder/nodes}
+%		\captionof{figure}{Prädikat \texttt{nodes}}
+%		\label{fig:nodes}
+%	\end{minipage}
+%	\hfill
+%	\begin{minipage}{.45\textwidth}
+%		\centering
+%		\input{Bilder/queue}
+%		\captionof{figure}{Prädikat \texttt{queue}}
+%		\label{fig:queue}
+%	\end{minipage}
+%\end{figure}
 
-\cref{fig:nodes} veranschaulicht die erste \texttt{close}-Anweisung in \texttt{create\_queue} aus \cref{subsuc:malloc}. In dieser Abstraktion wird ein Teil der generierten Chunks ($C_{3},\ldots,C_{6}$) durch das Prädikat \texttt{nodes} gekapselt, dass wiederum in \texttt{queue} enthalten ist (vgl. \cref{fig:queue}). Die konkrete Implementierung der beiden Prädikate sieht somit wie folgt aus.
+Das nachfolgende Listing zeigt die Prädikate \texttt{nodes} und \texttt{queue}, die in den beiden \texttt{close}-Anweisungen der Funktion \texttt{create\_queue} aus \cref{subsuc:malloc} verwendet wurden.
+
+%\cref{fig:nodes} veranschaulicht die erste \texttt{close}-Anweisung in \texttt{create\_queue} aus \cref{subsuc:malloc}. In dieser Abstraktion wird ein Teil der generierten Chunks ($C_{3},\ldots,C_{6}$) durch das Prädikat \texttt{nodes} gekapselt, dass wiederum in \texttt{queue} enthalten ist (vgl. \cref{fig:queue}). Die konkrete Implementierung der beiden Prädikate sieht somit wie folgt aus.
 
 \vspace{-10pt}
 {\noindent
@@ -222,7 +223,7 @@ VeriFast zeigt für Schleifen ausschließlich \emph{partielle Korrektheit}\footn
 		\item Fallunterscheidung bzgl. der Schleifenbedingung: % $\epsilon$:
 		\begin{itemize}
 			% Vergroeßere den Abstand zwischen zwei Items, um diese besser lesbar zu machen
-			\setlength\itemsep{1ex}
+%			\setlength\itemsep{1ex}
 %			\item $[\![\epsilon]\!] = true:$
 			\item Schleifenbedingung erfüllt:
 			\begin{enumerate}
@@ -295,7 +296,7 @@ Hier fordert \texttt{requires} eine gültige \texttt{nodes}-Abstraktion, in der 
 
 Im Verlauf dieser Sektion werden die Funktionen \texttt{queue\_enqueue} und \texttt{queue\_dequeue} beschrieben, mit deren Hilfe ein neues Element am Ende der Queue eingereiht bzw. das erste und älteste Element herausgenommen werden kann. Darüber hinaus wird die Schnittstellenfunktion \texttt{queue\_contains} vorgestellt, welche prüft, ob ein gesuchtes Element innerhalb der Queue enthalten ist.
 
-\begin{figure}[b]
+\begin{figure}[t]
 	\centering
 	\input{Bilder/list}
 	\caption{Ablauf von \texttt{queue\_enqueue}}
