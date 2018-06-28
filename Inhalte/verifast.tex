@@ -210,7 +210,7 @@ Das Abbruchkriterium der Rekursion ist dann erfüllt, wenn \texttt{first} gleich
 
 \subsubsection{Schleifeninvarianten}
 
-Eine Schleifeninvariante (INV) ist ein Spezialfall einer Invariante. Diese beschreibt eine logische Aussage, die zu Beginn und Ende einer Schleife, sowie nach jedem Schleifendurchgang, gelten bzw. erhalten bleiben muss. INV liefert somit eine Aussage über die Semantik des Schleifenrumpfs, die unabhängig von der Anzahl der Schleifendurchgänge gilt.
+Eine Schleifeninvariante (INV) ist ein Spezialfall einer Invariante. Diese beschreibt eine logische Aussage, die zu Beginn und Ende einer Schleife, sowie nach jedem Schleifendurchgang gelten bzw. erhalten bleiben muss. INV liefert somit eine Aussage über die Semantik des Schleifenrumpfs, die unabhängig von der Anzahl der Schleifendurchgänge gilt.
 
 VeriFast zeigt für Schleifen ausschließlich \emph{partielle Korrektheit}\footnote{Anders als bei \emph{totaler Korrektheit} wird hierbei der Terminierungsnachweis ausgelassen.}, deren Verifikation wie folgt abläuft: \cite{Jacobs2017}
 
@@ -263,9 +263,9 @@ void queue_destroy(struct queue *q)
 \subsubsection{Lemma Funktionen}
 \label{subsubsec:lemma}
 
-Lemma und C-Funktionen sind einander sehr ähnlich, da beide zuerst die Vorbedingung konsumieren und anschließend die Nachbedingung produzieren. Der Unterschied liegt darin, dass weder Variablenzuweisungen noch Methodenaufrufe enthalten sein dürfen. Des weiteren muss sichergestellt werden, dass rekursive Lemma Funktion in allen Pfaden terminieren\footnote{Eine genaue Auflistung der zulässigen Rekursionsarten ist in \cite[S. 22]{Jacobs2017} zu finden.}. Ziel einer solchen Funktion ist die Transformation einer Darstellung von Heap-Chunks in eine andere, wobei die zugrunde liegenden Chunks unverändert bleiben \cite{Jacobs2010}.
+Lemma und C-Funktionen sind einander sehr ähnlich, da beide zuerst die Vorbedingung konsumieren und anschließend die Nachbedingung produzieren. Der Unterschied liegt darin, dass weder Variablenzuweisungen noch Methodenaufrufe enthalten sein dürfen. Des weiteren muss sichergestellt werden, dass rekursive Lemma Funktion in allen Pfaden terminieren. Welche Arten von Rekursion hierbei zulässig sind, wird in \cite[S. 22]{Jacobs2017} ausführlich beschrieben. Ziel einer solchen Funktion ist die Transformation einer Darstellung von Heap-Chunks in eine andere, wobei die zugrunde liegenden Chunks unverändert bleiben \cite{Jacobs2010}.
 
-In Hinblick auf das Beispiel in \cref{subsec:queue} wird an dieser Stelle die Lemma Funktion \texttt{nodes\_add} vorgestellt.
+In Voraussicht auf die Funktion \texttt{queue\_enqueue}, welche in \cref{subsec:queue} erklärt wird, soll an dieser Stelle die Lemma Funktion \texttt{nodes\_add} eingeführt werden.
 
 \begin{lstlisting}
 lemma void nodes_add(struct node *first)
@@ -303,7 +303,9 @@ Im Verlauf dieser Sektion werden die Funktionen \texttt{queue\_enqueue} und \tex
 	\label{fig:list}
 \end{figure}
 
-\cref{fig:list} veranschaulicht den Zustand der Queue vor und nach der Ausführung von \texttt{queue\_enqueue}. Darin wird das Element $c_{n}$ eingefügt und anschließend \texttt{last} auf den neuen Hilfsknoten ($last_{new}$) gesetzt. Innerhalb von \texttt{queue\_enqueue} kann nun die Lemma Funktion \texttt{nodes\_add} aus \cref{subsubsec:lemma} eingesetzt werden, wodurch \texttt{nodes} erneut den Inhalt der erweiterten Queue abstrahiert. Die Schnittstellenfunktion \texttt{queue\_dequeue} benötigt hingegen keine zusätzliche Lemma Funktion, da \texttt{nodes(first, last, cons(val, vs))} genau einmal aufgespalten werden muss, um an das geschachtelte Folgeprädikat \texttt{nodes(first->next, last, vs)} zu gelangen. Dieses kann dann im nächsten Schritt erneut an \texttt{queue} gebunden werden.
+\cref{fig:list} veranschaulicht den Zustand der Queue vor und nach der Ausführung von \texttt{queue\_enqueue}. Darin wird das Element $c_{n}$ eingefügt und anschließend \texttt{last} auf den neuen Hilfsknoten $last_{new}$ gesetzt. Innerhalb von \texttt{queue\_enqueue} kann nun die im vorherigen Abschnitt eingeführte Lemma Funktion \texttt{nodes\_add} eingesetzt werden, wodurch \texttt{nodes} erneut den Inhalt der erweiterten Queue abstrahiert.
+
+Die Schnittstellenfunktion \texttt{queue\_dequeue} benötigt hingegen keine zusätzliche Lemma Funktion, da \texttt{nodes(first, last, cons(val, vs))} genau einmal aufgespalten werden muss, um an das geschachtelte Folgeprädikat \texttt{nodes(first->next, last, vs)} zu gelangen. Dieses kann dann im nächsten Schritt erneut an \texttt{queue} gebunden werden, wodurch die Nachbedingung des Kontrakts erfüllt wird.
 
 \vspace{-10pt}
 {\noindent
