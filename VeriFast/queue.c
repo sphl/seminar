@@ -3,22 +3,22 @@
 /*@
 lemma void nodes_add(struct node *first)
   requires nodes(first, ?last, ?vs) &*&
-    last->next |-> ?next &*&
+    last->next |-> ?newLast &*&
     last->value |-> ?val &*&
     malloc_block_node(last) &*&
-    next->next |-> ?nextNext;
-  ensures nodes(first, next, ?vs0) &*&
-    //vs0 == append(vs, cons(val, nil)) &*&
-    vs0 == reverse(cons(val, reverse(vs))) &*&
-    next->next |-> nextNext;
+    newLast->next |-> ?nextNext;
+  ensures nodes(first, newLast, ?vs0) &*&
+    vs0 == append(vs, cons(val, nil)) &*&
+    //vs0 == reverse(cons(val, reverse(vs))) &*&
+    newLast->next |-> nextNext;
 {
   open nodes(first, last, vs);
   if (first == last) {
-      close nodes(next, next, nil);
+      close nodes(newLast, newLast, nil);
   } else {
       nodes_add(first->next);
   }
-  close nodes(first, next, _);
+  close nodes(first, newLast, _);
 }
 @*/
 

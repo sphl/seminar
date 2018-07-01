@@ -9,16 +9,16 @@ VeriFast erlaubt die Verifikation von \emph{single-} und \emph{multithreaded} C 
 	\label{fig:vfide}
 \end{figure}
 
-Während der Ausführung von VeriFast wird das Programm auf illegale Speicherzugriffe, beispielsweise durch Dereferenzierung von Null-Pointern oder durch Zugriff auf Speicherzellen außerhalb der Grenzen eines Arrays, sowie Fehler aufgrund nebenläufiger Ausführung (\emph{data races}) geprüft \cite{Jacobs2010}. Darüber hinaus verifiziert VeriFast die annotierten Methoden-Kontrakte - d.h. es wird versucht zu zeigen, dass sich die Nachbedingung aus der Vorbedingung und der symbolischen Ausführung des Methodenrumpfs ergibt. Diesbezüglich wird im Back-End der SMT Solver Z3 von Microsoft verwendet.
+Während der Ausführung von VeriFast wird das Programm auf illegale Speicherzugriffe, beispielsweise durch Dereferenzierung von Null-Pointern oder durch Zugriff auf Speicherzellen außerhalb der Grenzen eines Arrays, sowie Fehler aufgrund nebenläufiger Ausführung (\emph{data races}) geprüft \cite{Jacobs2010}. Darüber hinaus verifiziert VeriFast die annotierten Methoden-Kontrakte - d.h. es wird versucht zu zeigen, dass sich die Nachbedingung aus der Vorbedingung und der symbolischen Ausführung des Methodenrumpfs ergibt. Diesbezüglich wird im Back-End Microsofts \emph{Z3} (\emph{SMT Solver}) verwendet.
 
-Über die VeriFast IDE, die in \vref{fig:vfide} zu sehen ist, können Quellcodedateien editiert und Programme schrittweise oder in einem Durchlauf verifiziert werden. Im Falle eines Fehlers werden diese innerhalb des Editors lokalisiert und anhand einer Statusmeldung dem Benutzer mitgeteilt. Wurde die Verifikation erfolgreich durchlaufen, so können abhängig von der ausgewählten Funktion die durchlaufenen Pfade in Form eines Ausführungsbaums, der sich auf der rechten Seite der VeriFast IDE befindet, angezeigt werden. Zudem ermöglicht VeriFast über das Anklicken eines Blattknotens die Analyse einzelner Pfade. Die \emph{steps}-Auswahl in \cref{fig:vfide} listet hierbei die ausgeführten Schritte eines Pfades auf und erlaubt Sprünge zu vorherigen bzw. nachfolgenden Zuständen. Nebenan befinden sich die logischen Annahmen, die sich aus den Annotationen und dem ausgeführten C Code ergeben und somit die \emph{Pfadbedingung} $\Sigma$ bilden. Eine Besonderheit der IDE ist die Anzeige des \emph{symbolischen Heap} $h$, welcher abhängig vom Ausführungsschritt dessen Einträge (\emph{Heap Chunks}) darstellt. Darüber befindet sich der \emph{symbolische Store} $s$, welcher die Zuordnung der lokalen Variablen auf deren symbolischen Werte verwaltet. Dementsprechend ist der Pfadzustand durch das Tupel $(\Sigma, h, s)$ gegeben \cite{Jacobs2011}.
+Über die VeriFast IDE, die in \vref{fig:vfide} zu sehen ist, können Quellcodedateien editiert und Programme schrittweise oder in einem Durchlauf verifiziert werden. Im Falle eines Fehlers werden diese innerhalb des Editors lokalisiert und anhand einer Statusmeldung dem Benutzer mitgeteilt. Wurde die Verifikation erfolgreich durchlaufen, so können, abhängig von der ausgewählten Funktion, die durchlaufenen Pfade in Form eines Ausführungsbaums, der sich auf der rechten Seite der VeriFast IDE befindet, angezeigt werden. Zudem ermöglicht VeriFast über das Anklicken eines Blattknotens die Analyse einzelner Pfade. Die \emph{steps}-Auswahl in \cref{fig:vfide} listet hierbei die ausgeführten Schritte eines Pfades auf und erlaubt Sprünge zu vorherigen bzw. nachfolgenden Zuständen. Nebenan befinden sich die logischen Annahmen, die sich aus den Annotationen und dem ausgeführten C Code ergeben und somit die \emph{Pfadbedingung} $\Sigma$ bilden. Eine Besonderheit der IDE ist die Anzeige des \emph{symbolischen Heap} $h$, welcher abhängig vom Ausführungsschritt dessen Einträge (\emph{Heap Chunks}) darstellt. Darüber befindet sich der \emph{symbolische Store} $s$, welcher die Zuordnung der lokalen Variablen auf deren symbolischen Werte verwaltet. Dementsprechend ist der Pfadzustand durch das Tupel $(\Sigma, h, s)$ gegeben \cite{Jacobs2011}.
 
 \subsection{Symbolischer Heap-Speicher}
 \label{subsuc:malloc}
 
-Charakteristisch für C ist die dynamische Speicherverwaltung mittels den beiden Funktionen \texttt{malloc} und \texttt{free}. Dadurch kann eine festgelegte Anzahl an Bytes angefordert und darauf, falls erfolgreich vom Betriebssystem alloziert, über einen Zeiger auf den Heap-Speicher zugegriffen werden. Da C über keine automatische \emph{Garbage Collection} (GC) verfügt, steht der Programmierer in der Pflicht den Speicherbereich, falls dieser nicht mehr benötigt wird, manuell mit Hilfe von \texttt{free} zu räumen. Dementsprechend gilt es auch den Zustand des Heap-Speichers bei der Verifikation von Programmen zu berücksichtigen. Hierbei legt VeriFast sogenannte \emph{Chunks} auf dem symbolischen Heap-Speicher ab, wann immer eine Datenstruktur während der symbolischen Ausführung alloziert wird. Instanzen die über \texttt{malloc} erzeugt wurden, werden von VeriFast besonders behandelt. Diese erhalten neben dem normalen Heap-Eintrag einen zusätzlichen \texttt{malloc\_block} Chunk welcher signalisiert, dass es sich um einen dynamischen Speicherblock handelt \cite{Jacobs2008,Jacobs2010}. Über diesen Mechanismus kann vor der Freigabe überprüft werden, ob die zu löschende Instanz über einen gültigen \texttt{malloc\_block} Eintrag verfügt. Ist dies der Fall, so kann der Speicherblock aus dem Heap-Speicher entfernt werden.
+Charakteristisch für C ist die dynamische Speicherverwaltung mittels den beiden Funktionen \texttt{malloc} und \texttt{free}. Dadurch kann eine festgelegte Anzahl an Bytes angefordert und darauf, falls erfolgreich vom Betriebssystem alloziert, über einen Zeiger auf den Heap-Speicher zugegriffen werden. Da C über keine automatische \emph{Garbage Collection} (GC) verfügt, steht der Programmierer in der Pflicht, den Speicherbereich, falls dieser nicht mehr benötigt wird, manuell mit Hilfe von \texttt{free} zu räumen. Dementsprechend gilt es auch den Zustand des Heap-Speichers bei der Verifikation von Programmen zu berücksichtigen. Hierbei legt VeriFast sogenannte \emph{Chunks} auf dem symbolischen Heap-Speicher ab, wann immer eine Datenstruktur während der symbolischen Ausführung alloziert wird. Instanzen die über \texttt{malloc} erzeugt wurden, werden von VeriFast besonders behandelt. Diese erhalten neben dem normalen Heap-Eintrag einen zusätzlichen \texttt{malloc\_block} Chunk, welcher signalisiert das es sich um einen dynamischen Speicherblock handelt \cite{Jacobs2008,Jacobs2010}. Über diesen Mechanismus kann vor der Freigabe überprüft werden, ob die zu löschende Instanz über einen gültigen \texttt{malloc\_block} Eintrag verfügt. Ist dies der Fall, so kann der Speicherblock aus dem Heap-Speicher entfernt werden.
 
-Das nachfolgende Listing zeigt die beiden C-Strukturen \texttt{node} und \texttt{queue}. Erstere stellt einen Knoten in einer einfach verketteten Liste dar, welche neben einer Variablen vom Typ \texttt{char} einen Zeiger auf das nächste Listenelement enthält. \texttt{queue} verfügt über zwei Zeiger die jeweils auf das erste bzw. letzte Element einer Warteschlange zeigen. Darüber hinaus ist die Funktion \texttt{create\_queue} zu sehen, welche Heap-Speicher für eine neue Queue alloziert und anschließend den Variablen \texttt{first} und \texttt{last} initial den gleichen Knoten zuweist. Die darin enthaltenen, VeriFast-spezifischen Annotationen werden jedoch erst in \cref{subsec:vflang} erklärt und können somit vorerst übersprungen werden.
+Das nachfolgende Listing zeigt die beiden C-Strukturen \texttt{node} und \texttt{queue}. Erstere stellt einen Knoten in einer einfach verketteten Liste dar, welche neben einer Variablen vom Typ \texttt{char}, einen Zeiger auf das nächste Listenelement enthält. \texttt{queue} verfügt über zwei Zeiger, die jeweils auf das erste bzw. letzte Element einer Warteschlange zeigen. Darüber hinaus ist die Funktion \texttt{create\_queue} zu sehen, welche Heap-Speicher für eine neue Queue alloziert und anschließend den Variablen \texttt{first} und \texttt{last} initial den gleichen Knoten zuweist. Die darin enthaltenen VeriFast-spezifischen Annotationen werden jedoch erst in \cref{subsec:vflang} erklärt und können somit an dieser Stelle vorerst übersprungen werden.
 
 \vspace{-10pt}
 {\noindent
@@ -86,11 +86,11 @@ struct queue *create_queue()
 \subsection{Konzepte der Verifikation}
 \label{subsec:vflang}
 
-In diesem Abschnitt werden einige Konzepte vorgestellt die VeriFast für die Programmverifikation bereitstellt. Dabei werden vorzugsweise die Konzepte behandelt, welche für das Verständnis des Beispiels in \cref{subsec:queue} relevant sind. Weiterführende Konzepte und Beispiele können in \cite{Jacobs2017} nachgelesen werden.
+In diesem Abschnitt werden einige Konzepte vorgestellt, die VeriFast für die Programmverifikation bereitstellt. Dabei werden vorzugsweise die Konzepte behandelt, welche für das Verständnis des Beispiels in \cref{subsec:queue} relevant sind. Weiterführende Konzepte und Beispiele können in \cite{Jacobs2017} nachgelesen werden.
 
 \subsubsection{Kontrakte}
 
-Kontrakte beschreiben einen Vertrag zwischen dem Aufrufer einer Methode und deren Implementierung. Dabei besitzt jede Methodendeklaration eine Vor- und Nachbedingung die angeben, dass wenn die Vorbedingung (vom Aufrufer) erfüllt wird, die Nachbedingung von der Implementierung der Methode zugesichert werden kann. Zuvor gilt es allerdings für jeden Kontrakt zu zeigen, dass die Nachbedingung aus der Vorbedingung und dem finalen Pfadzustand folgt. Dieser Ansatz, der als \emph{Design-by-Contract} bezeichnet wird, wird auch von VeriFast verwendet, um die Korrektheit von C-Funktionen nachzuweisen. Für die Vor- und Nachbedingung stehen die Annotationen \texttt{requires} und \texttt{ensures} zur Verfügung, deren Bedingung in Form einer Formel definiert wird. Diese setzt sich wiederum aus Heap Chunks und booleschen Ausdrücken zusammen, welche mittels \emph{Separation Conjunction} $(\&{*}\&)$ (Bestandteil der \emph{Separation Logic}) kombiniert werden.
+Kontrakte beschreiben einen Vertrag zwischen dem Aufrufer einer Methode und deren Implementierung. Dabei besitzt jede Methodendeklaration eine Vor- und Nachbedingung, die angeben, dass wenn die Vorbedingung (vom Aufrufer) erfüllt wird, die Nachbedingung von der Implementierung der Methode zugesichert werden kann. Zuvor gilt es allerdings für jeden Kontrakt zu zeigen, dass die Nachbedingung aus der Vorbedingung und dem finalen Pfadzustand folgt. Dieser Ansatz, der als \emph{Design-by-Contract} bezeichnet wird, wird auch von VeriFast verwendet, um die Korrektheit von C-Funktionen nachzuweisen. Für die Vor- und Nachbedingung stehen die Annotationen \texttt{requires} und \texttt{ensures} zur Verfügung, deren Bedingung in Form einer Formel definiert wird. Diese setzt sich wiederum aus Heap-Chunks und booleschen Ausdrücken zusammen, welche mittels \emph{Separation Conjunction} $(\&{*}\&)$ (Bestandteil der \emph{Separation Logic}) kombiniert werden.
 
 Allgemein beschreibt Separation Logic eine Erweiterung der \emph{Hoare Logic}, welche Schlussfolgerungen über geteilte, änderbare Datenstrukturen, wie bspw. der Heap-Speicher in Java und C, erlaubt \cite{Reynolds2002}. Die Konjunktion $C_{1} \; \&{*}\& \; C_{2}$ beschreibt dabei, dass $C_{1}$ und $C_{2}$ auf disjunkten Speicherbereichen gelten und somit Änderungen keinen Einfluss bzw. Nebeneffekte auf andere Bereiche des Speichers haben.
 
@@ -99,7 +99,7 @@ Um zu zeigen das die Vorbedingung bei einem Methodenaufruf erfüllt wird, versuc
 \subsubsection{Induktive Datentypen}
 \label{subsubsec:adt}
 
-Ein wichtiges Hilfsmittel um die Korrektheit von Programme nachzuweisen, besteht in der Spezifikation von abstrakten Datentypen (ADT). Diese ermöglichen es, Eigenschaften und Operationen eines Datentyps auf einem höheren Abstraktionsniveau, d.h. unabhängig von der konkreten Implementierung auf einem Computer, zu betrachten \cite[S. 265]{Saake2014}. Daraus resultierend können ADTs in der Programmverifikation als Repräsentanten für die Inhalte konkrete Datenstrukturen, wie beispielsweise Arrays oder einfach- oder doppelt-verkettete Listen, eingesetzt werden.
+Ein wichtiges Hilfsmittel um die Korrektheit von Programme nachzuweisen, besteht in der Spezifikation von abstrakten Datentypen (ADT). Diese ermöglichen es, Eigenschaften und Operationen eines Datentyps auf einem höheren Abstraktionsniveau, d.h. unabhängig von der konkreten Implementierung auf einem Computer, zu betrachten \cite[S. 265]{Saake2014}. Daraus resultierend, können ADTs in der Programmverifikation als Repräsentanten für die Inhalte konkrete Datenstrukturen, wie beispielsweise Arrays oder einfach- oder doppelt-verkettete Listen, eingesetzt werden.
 
 VeriFast unterstützt den Einsatz von induktiven Datentypen, deren Instanzen über \emph{Konstruktorterme} gebildet werden. Die Spezifikation einer abstrakten Liste sieht dabei wie folgt aus.
 
@@ -108,11 +108,11 @@ inductive list<t> = nil | cons(t, list<t>);
 \end{lstlisting}
 
 \noindent
-In diesem Beispiel wurde eine generische Liste mit den Konstruktoren \texttt{nil} für die leere Liste und \texttt{cons} für die zusammengesetzte Liste, mit Kopfelement vom Typ \texttt{t} und Restliste des Datentyps \texttt{list<t>}, definiert. Analog zu den meisten Programmiersprachen spezifiziert \texttt{<t>} den generischen Datentyp, wodurch Listen über \texttt{int}, \texttt{char}, \texttt{bool} etc. konstruiert werden können. So entspricht der Konstruktorterm \texttt{cons('a', cons('b', cons('c', nil)))} einer Liste mit der Zeichenfolge \texttt{<'a', 'b', 'c'>}.
+In diesem Beispiel wurde eine generische Liste mit den Konstruktoren \texttt{nil} für die leere Liste und \texttt{cons} für die zusammengesetzte Liste, mit Kopfelement vom Typ \texttt{t} und Restliste des Datentyps \texttt{list<t>}, definiert. Analog zu den meisten Programmiersprachen, spezifiziert \texttt{<t>} den generischen Datentyp, wodurch Listen über \texttt{int}, \texttt{char}, \texttt{bool} etc. konstruiert werden können. So entspricht der Konstruktorterm \texttt{cons('a', cons('b', cons('c', nil)))} einer Liste mit der Zeichenfolge \texttt{<'a', 'b', 'c'>}.
 
 \subsubsection{Fixpunkt Funktionen}
 
-Neben den induktiven ADTs unterstützt VeriFast die Spezifikation von Fixpunkt Funktionen, wodurch spezifische Operation auf induktive Datentypen definiert werden können. Diese werden mit \texttt{fixpoint} eingeleitet und erhalten über die Parameterliste einen oder mehrere ADTs. Im Funktionsrumpf kann entweder direkt eine \texttt{return}-Anweisung, welche die berechnete Eigenschaft an den Aufrufer zurückgibt, oder eine \texttt{switch}-Anweisung stehen. Letztere führt eine Fallunterscheidung bezüglich aller Konstruktoren von genau einem induktiven Argument aus. Zudem prüft VeriFast jede Funktion auf Terminierung - d.h. im Falle eines rekursiven Aufrufs muss der neue Konstruktorterm des Übergabeparameters ein Teilterm des alten Parameters sein \cite{Jacobs2010}.
+Neben den induktiven ADTs unterstützt VeriFast die Spezifikation von Fixpunkt Funktionen, wodurch spezifische Operation auf induktive Datentypen definiert werden können. Diese werden mit \texttt{fixpoint} eingeleitet und erhalten über die Parameterliste einen oder mehrere ADTs. Im Funktionsrumpf kann entweder direkt eine \texttt{return}-Anweisung, welche die berechnete Eigenschaft an den Aufrufer zurückgibt, oder eine \texttt{switch}-Anweisung stehen. Letztere führt eine Fallunterscheidung bezüglich aller Konstruktoren von genau einem induktiven Argument aus. Zudem prüft VeriFast jede Funktion auf Terminierung - d.h. im Falle eines rekursiven Aufrufs muss der Konstruktorterm des neuen Übergabeparameters ein Teilterm des alten Parameters sein \cite{Jacobs2010}.
 
 Ausgehend von der induktiven Liste in \cref{subsubsec:adt}, definieren wir die beiden Funktionen \texttt{head} und \texttt{tail}, welche das Kopfelement bzw. die Restliste von \texttt{xs} zurückliefern.
 
@@ -134,7 +134,7 @@ fixpoint list<t> tail<t>(list<t> xs) {
 \noindent
 Für den Konstruktor \texttt{cons(t, list<t>)} bindet VeriFast die entsprechenden Werte an die Variablen \texttt{x} und \texttt{xs0}, welche im Anschluss beliebig weiterverwendet werden können. Ein Sonderfall in diesem Beispiel ist der Konstruktor \texttt{nil} in \texttt{head}. Hierbei wird ein Defaultwert zurückgegeben, der je nach Anforderung und Datentyp unterschiedliche Werte annehmen kann.
 
-Eine weitere bekannte Funktion auf Container-Datentypen ist \texttt{length}, welche in diesem Beispiel die Länge einer Liste rekursiv berechnet. Wurde ein Term ungleich \texttt{nil} übergeben, so wird dieser sukzessive abgebaut und zugleich die Länge um den Wert 1 erhöht. Der letzte Aufruf endet immer im \texttt{nil}-Konstruktor, welcher folgerichtig den die Länge 0 zurückgibt und damit die Berechnung abschließt.%\footnote{Die Funktionen \texttt{head}, \texttt{tail}, \texttt{length} und weitere Fixpunkt-Operationen auf \texttt{list<t>} sind Bestandteil der VeriFast-Bibliothek.}
+Eine weitere bekannte Funktion auf Container-Datentypen ist \texttt{length}, welche in diesem Beispiel die Länge einer Liste rekursiv berechnet. Wurde ein Term ungleich \texttt{nil} übergeben, so wird dieser sukzessive abgebaut und zugleich die Länge um den Wert 1 erhöht. Der letzte Aufruf endet immer im \texttt{nil}-Konstruktor, welcher folgerichtig die Länge 0 zurückgibt und damit die Berechnung abschließt.%\footnote{Die Funktionen \texttt{head}, \texttt{tail}, \texttt{length} und weitere Fixpunkt-Operationen auf \texttt{list<t>} sind Bestandteil der VeriFast-Bibliothek.}
 
 \begin{lstlisting}
 fixpoint int length<t>(list<t> xs) {
@@ -147,7 +147,7 @@ fixpoint int length<t>(list<t> xs) {
 
 \subsubsection{Prädikate}
 
-Prädikate werden dazu eingesetzt, Aussagen, die wiederkehrend in unterschiedlichen Methodenkontrakten Verwendung finden, zu kapseln. Über den \texttt{close}-Befehl werden diese durch ein passendes Prädikat gebündelt, wobei die enthaltenen Chunks durch das entsprechende Prädikat auf dem Heap ersetzt werden. Die entgegengesetzte Wirkung erzielt \texttt{open}, dass ein Prädikat in dessen ursprüngliche Aussagen zerlegt \cite{Jacobs2008,Jacobs2017}.
+Prädikate werden dazu eingesetzt, um Aussagen, die wiederkehrend in unterschiedlichen Methodenkontrakten Verwendung finden, zu kapseln. Über den \texttt{close}-Befehl werden diese durch ein passendes Prädikat gebündelt, wobei die enthaltenen Chunks durch das entsprechende Prädikat auf dem Heap ersetzt werden. Die entgegengesetzte Wirkung erzielt \texttt{open}, dass ein Prädikat in dessen ursprüngliche Aussagen zerlegt \cite{Jacobs2008,Jacobs2017}.
 
 %\begin{figure}[t]
 %	\centering
@@ -204,9 +204,9 @@ predicate queue(
 }
 
 \noindent
-Innerhalb des Listings werde neue Variablen mittels \texttt{?var} eingeführt. Der symbolische Wert wird dabei an den Variablennamen gebunden, um explizite Aussagen über Variablenwerte formulieren zu können. Anders verhält es sich mit \texttt{\_}, dass als namenloser Platzhalter für beliebige Werte von VeriFast interpretiert wird \cite{Jacobs2017}. \texttt{nodes} beschreibt in diesem Beispiel ein rekursives Prädikat, dessen induktive Liste \texttt{vs} den Inhalt zwischen den Knoten \texttt{first} und \texttt{last} repräsentiert. Hierbei setzt sich \texttt{vs} aus dem aktuellen Wert und der Restliste \texttt{vs0}, die sich wiederum aus dem rekursiven Aufruf und dem Folgeknoten von \texttt{first} ergibt, zusammen.
+Innerhalb des Listings werde neue Variablen mittels \texttt{?var} eingeführt. Der symbolische Wert wird dabei an den Variablennamen gebunden, um explizite Aussagen über Variablenwerte formulieren zu können. Anders verhält es sich mit \texttt{\_}, dass als namenloser Platzhalter für beliebige Werte von VeriFast interpretiert wird \cite{Jacobs2017}. \texttt{nodes} beschreibt in diesem Beispiel ein rekursives Prädikat, dessen induktive Liste \texttt{vs} den Inhalt zwischen den Knoten \texttt{first} und \texttt{last} repräsentiert. Hierbei setzt sich \texttt{vs} aus dem aktuellen Wert und der Restliste \texttt{vs0}, die sich wiederum aus einem bereits vorhandenen \texttt{nodes}-Prädikat ergibt, zusammen.
 
-Das Abbruchkriterium der Rekursion ist dann erfüllt, wenn \texttt{first} gleicht dem Knoten \texttt{last} ist, dementsprechend keine Zwischenknoten existieren und somit die Restliste leer ist. Hier gilt es zu beachten, dass \texttt{last} zu jeden Zeitpunkt auf einem Hilfsknoten zeigt, welcher keine Nutzdaten speichert. Das zweite Prädikat \texttt{queue} enthält neben \texttt{nodes} weitere Chunks und soll eine gültige Queue darstellen. %D.h. nach einer erfolgreichen Ausführung von \texttt{create\_queue} befindet sich \texttt{queue}, zusammen mit den entsprechenden Parametern, auf dem symbolischen Heap.
+Die Bedingung in \texttt{nodes} prüft zudem, ob \texttt{first} gleicht dem Knoten \texttt{last} ist. In diesem Fall existieren keine Zwischenknoten und \texttt{vs} gleicht einer leeren Liste. Hier gilt es zu beachten, dass \texttt{last} zu jeden Zeitpunkt auf einem Hilfsknoten zeigt, welcher keine Nutzdaten speichert. Das zweite Prädikat \texttt{queue} enthält neben \texttt{nodes} weitere Chunks und soll eine gültige Queue darstellen. %D.h. nach einer erfolgreichen Ausführung von \texttt{create\_queue} befindet sich \texttt{queue}, zusammen mit den entsprechenden Parametern, auf dem symbolischen Heap.
 
 \subsubsection{Schleifeninvarianten}
 
@@ -265,26 +265,26 @@ void queue_destroy(struct queue *q)
 
 Lemma und C-Funktionen sind einander sehr ähnlich, da beide zuerst die Vorbedingung konsumieren und anschließend die Nachbedingung produzieren. Der Unterschied liegt darin, dass weder Variablenzuweisungen noch Methodenaufrufe enthalten sein dürfen. Des weiteren muss sichergestellt werden, dass rekursive Lemma Funktion in allen Pfaden terminieren. Welche Arten von Rekursion hierbei zulässig sind, wird in \cite[S. 22]{Jacobs2017} ausführlich beschrieben. Ziel einer solchen Funktion ist die Transformation einer Darstellung von Heap-Chunks in eine andere, wobei die zugrunde liegenden Chunks unverändert bleiben \cite{Jacobs2010}.
 
-In Voraussicht auf die Funktion \texttt{queue\_enqueue}, welche in \cref{subsec:queue} erklärt wird, soll an dieser Stelle die Lemma Funktion \texttt{nodes\_add} eingeführt werden.
+In Voraussicht auf die Funktion \texttt{queue\_enqueue} in \cref{subsec:queue}, soll an dieser Stelle die Lemma Funktion \texttt{nodes\_add} eingeführt werden.
 
 \begin{lstlisting}
 lemma void nodes_add(struct node *first)
   requires nodes(first, ?last, ?vs) &*&
-    last->next |-> ?next &*&
+    last->next |-> ?newLast &*&
     last->value |-> ?val &*&
     malloc_block_node(last) &*&
-    next->next |-> ?nextNext;
-  ensures nodes(first, next, ?vs0) &*&
+    newLast->next |-> ?nextNext;
+  ensures nodes(first, newLast, ?vs0) &*&
     vs0 == append(vs, cons(val, nil)) &*&
-    next->next |-> nextNext;
+    newLast->next |-> nextNext;
 {
   open nodes(first, last, vs);
   if (first == last) {
-      close nodes(next, next, nil);
+      close nodes(newLast, newLast, nil);
   } else {
       nodes_add(first->next);
   }
-  close nodes(first, next, _);
+  close nodes(first, newLast, _);
 }
 \end{lstlisting}
 
@@ -303,7 +303,7 @@ Im Verlauf dieser Sektion werden die Funktionen \texttt{queue\_enqueue} und \tex
 	\label{fig:list}
 \end{figure}
 
-\cref{fig:list} veranschaulicht den Zustand der Queue vor und nach der Ausführung von \texttt{queue\_enqueue}. Darin wird das Element $c_{n}$ eingefügt und anschließend \texttt{last} auf den neuen Hilfsknoten $last_{new}$ gesetzt. Innerhalb von \texttt{queue\_enqueue} kann nun die im vorherigen Abschnitt eingeführte Lemma Funktion \texttt{nodes\_add} eingesetzt werden, wodurch \texttt{nodes} erneut den Inhalt der erweiterten Queue abstrahiert.
+\cref{fig:list} veranschaulicht den Zustand der Queue vor und nach der Ausführung von \texttt{queue\_enqueue}. Darin wird das Element $c_{n}$ eingefügt und anschließend \texttt{last} auf den neuen Hilfsknoten $last_{new}$ gesetzt. Innerhalb von \texttt{queue\_enqueue} kann nun die im vorherigen Abschnitt eingeführte Lemma Funktion \texttt{nodes\_add} eingesetzt werden, wodurch \texttt{nodes} den Inhalt der erweiterten Queue abstrahiert.
 
 Die Schnittstellenfunktion \texttt{queue\_dequeue} benötigt hingegen keine zusätzliche Lemma Funktion, da \texttt{nodes(first, last, cons(val, vs))} genau einmal aufgespalten werden muss, um an das geschachtelte Folgeprädikat \texttt{nodes(first->next, last, vs)} zu gelangen. Dieses kann dann im nächsten Schritt erneut an \texttt{queue} gebunden werden, wodurch die Nachbedingung des Kontrakts erfüllt wird.
 
